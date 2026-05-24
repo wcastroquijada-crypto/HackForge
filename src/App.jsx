@@ -4,15 +4,13 @@ import LabMap from "./components/Labs/LabMap";
 import LabDetail from "./components/Labs/LabDetail";
 import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
-// Hook: estado que persiste en localStorage
+
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
       const stored = localStorage.getItem(key);
       return stored ? JSON.parse(stored) : initialValue;
-    } catch {
-      return initialValue;
-    }
+    } catch { return initialValue; }
   });
   useEffect(() => {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
@@ -30,14 +28,23 @@ const CSS = `
   .btn { cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-weight: bold; transition: all .15s; border-radius: 5px; }
   .btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
   .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .hamburger { display: none; position: fixed; top: 12px; left: 12px; z-index: 1000; background: #0d1117; border: 1px solid #1e2a3a; color: #8b949e; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 18px; line-height: 1; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 998; }
+  @media (max-width: 768px) {
+    .hamburger { display: block; }
+    .sidebar { position: fixed !important; top: 0; left: 0; height: 100vh; z-index: 999; transform: translateX(-100%); transition: transform 0.25s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .main-content { padding: 16px !important; padding-top: 52px !important; }
+  }
 `;
 
 export default function App() {
-  const [nav, setNav]           = useState("dash");
-  const [labView, setLabView]   = useState("map");
+  const [nav, setNav]             = useState("dash");
+  const [labView, setLabView]     = useState("map");
   const [activeLab, setActiveLab] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Estado persistente
   const [doneLabs,  setDoneLabs]  = useLocalStorage("hf_doneLabs",  []);
   const [labsXp,    setLabsXp]    = useLocalStorage("hf_labsXp",    0);
   const [flStep,    setFlStep]    = useLocalStorage("hf_flStep",     0);
@@ -46,10 +53,9 @@ export default function App() {
   const [flDone,    setFlDone]    = useLocalStorage("hf_flDone",    false);
   const [streak,    setStreak]    = useLocalStorage("hf_streak",    0);
   const [lastVisit, setLastVisit] = useLocalStorage("hf_lastVisit", null);
-const [progresoMods, setProgresoMods] = useLocalStorage("hf_progresoMods", {});
+  const [progresoMods, setProgresoMods] = useLocalStorage("hf_progresoMods", {});
   const totalXp = 1240 + labsXp;
 
-  // Actualizar racha
   useEffect(() => {
     const today = new Date().toDateString();
     if (lastVisit !== today) {
@@ -77,14 +83,16 @@ const [progresoMods, setProgresoMods] = useLocalStorage("hf_progresoMods", {});
       else setTimeout(() => setFlStep(i + 1), 400);
     }
   };
-const completarLeccion = (modId, lecId, xp) => {
-  setProgresoMods(p => {
-    const mod = p[modId] || { completadas:0, leccionesId:[] };
-    if (mod.leccionesId.includes(lecId)) return p;
-    return { ...p, [modId]: { completadas: mod.completadas+1, leccionesId:[...mod.leccionesId, lecId] }};
-  });
-  setLabsXp(prev => prev + xp);
-};
+
+  const completarLeccion = (modId, lecId, xp) => {
+    setProgresoMods(p => {
+      const mod = p[modId] || { completadas:0, leccionesId:[] };
+      if (mod.leccionesId.includes(lecId)) return p;
+      return { ...p, [modId]: { completadas: mod.completadas+1, leccionesId:[...mod.leccionesId, lecId] }};
+    });
+    setLabsXp(prev => prev + xp);
+  };
+
   const resetProgress = () => {
     if (window.confirm("¿Resetear todo el progreso?")) {
       setDoneLabs([]); setLabsXp(0); setFlStep(0);
@@ -92,12 +100,23 @@ const completarLeccion = (modId, lecId, xp) => {
     }
   };
 
+  const handleNav = (id) => {
+    setNav(id);
+    if (id === "labs") setLabView("map");
+    setSidebarOpen(false);
+  };
+
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:C.bg, color:"#c9d1d9" }}>
       <style>{CSS}</style>
 
-      {/* SIDEBAR */}
-      <aside style={{ width:210, background:C.panel, borderRight:`1px solid ${C.border}`, display:"flex", flexDirection:"column", padding:"16px 12px", flexShrink:0, overflowY:"auto" }}>
+      <button className="hamburger" onClick={() => setSidebarOpen(o => !o)}>
+        {sidebarOpen ? "✕" : "☰"}
+      </button>
+
+      <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
+
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} style={{ width:210, background:C.panel, borderRight:`1px solid ${C.border}`, display:"flex", flexDirection:"column", padding:"16px 12px", flexShrink:0, overflowY:"auto" }}>
         <div style={{ marginBottom:20, paddingBottom:16, borderBottom:`1px solid ${C.border}` }}>
           <div style={{ color:C.cyan, fontSize:10, letterSpacing:4 }}>◈ HACKFORGE</div>
           <div style={{ color:"#fff", fontSize:15, fontWeight:"bold", marginTop:4 }}>Base Operaciones</div>
@@ -122,7 +141,7 @@ const completarLeccion = (modId, lecId, xp) => {
           { id:"ccna", icon:"📡", label:"CCNA Prep" },
         ].map(n=>(
           <div key={n.id} className="nav-item"
-            onClick={()=>{ setNav(n.id); if(n.id==="labs") setLabView("map"); }}
+            onClick={() => handleNav(n.id)}
             style={{ color:nav===n.id?"#fff":C.muted, background:nav===n.id?`${C.cyan}18`:"transparent", borderColor:nav===n.id?`${C.cyan}44`:"transparent" }}>
             <span style={{ fontSize:16 }}>{n.icon}</span>
             <span>{n.label}</span>
@@ -141,13 +160,10 @@ const completarLeccion = (modId, lecId, xp) => {
         </div>
       </aside>
 
-      {/* MAIN */}
-      <main style={{ flex:1, overflowY:"auto", padding:"24px" }}>
+      <main className="main-content" style={{ flex:1, overflowY:"auto", padding:"24px" }}>
 
         {nav==="dash" && <Dashboard totalXp={totalXp} doneLabs={doneLabs} labsXp={labsXp} streak={streak} onNav={setNav}/>}
-
         {nav==="labs" && labView==="map" && <LabMap doneLabs={doneLabs} labsXp={labsXp} onOpenLab={openLab} onOpenFinal={()=>setLabView("final")} flDone={flDone}/>}
-
         {nav==="labs" && labView==="detail" && activeLab && <LabDetail lab={activeLab} onBack={backToMap} onComplete={completeLab}/>}
 
         {nav==="labs" && labView==="final" && (
@@ -199,9 +215,7 @@ const completarLeccion = (modId, lecId, xp) => {
           </div>
         )}
 
-{nav==="mods" && (
-  <Modulos progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>
-)}
+        {nav==="mods" && <Modulos progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>}
 
         {nav==="cq"&&(
           <div style={{ textAlign:"center", paddingTop:60 }}>
