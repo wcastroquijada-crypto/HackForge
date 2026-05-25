@@ -4,6 +4,7 @@ import LabMap from "./components/Labs/LabMap";
 import LabDetail from "./components/Labs/LabDetail";
 import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
+import RedTeam from "./components/RedTeam/RedTeam";
 
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
@@ -134,11 +135,12 @@ export default function App() {
         </div>
 
         {[
-          { id:"dash", icon:"🏠", label:"Dashboard" },
-          { id:"labs", icon:"⚗️",  label:"Labs"      },
-          { id:"mods", icon:"📚", label:"Módulos"   },
-          { id:"cq",   icon:"🎮", label:"CodeQuest" },
-          { id:"ccna", icon:"📡", label:"CCNA Prep" },
+          { id:"dash", icon:"🏠", label:"Dashboard"  },
+          { id:"labs", icon:"⚗️",  label:"Labs"       },
+          { id:"mods", icon:"📚", label:"Módulos"    },
+          { id:"rt",   icon:"🔴", label:"Red Team"   },
+          { id:"cq",   icon:"🎮", label:"CodeQuest"  },
+          { id:"ccna", icon:"📡", label:"CCNA Prep"  },
         ].map(n=>(
           <div key={n.id} className="nav-item"
             onClick={() => handleNav(n.id)}
@@ -163,7 +165,9 @@ export default function App() {
       <main className="main-content" style={{ flex:1, overflowY:"auto", padding:"24px" }}>
 
         {nav==="dash" && <Dashboard totalXp={totalXp} doneLabs={doneLabs} labsXp={labsXp} streak={streak} onNav={setNav}/>}
+
         {nav==="labs" && labView==="map" && <LabMap doneLabs={doneLabs} labsXp={labsXp} onOpenLab={openLab} onOpenFinal={()=>setLabView("final")} flDone={flDone}/>}
+
         {nav==="labs" && labView==="detail" && activeLab && <LabDetail lab={activeLab} onBack={backToMap} onComplete={completeLab}/>}
 
         {nav==="labs" && labView==="final" && (
@@ -217,6 +221,8 @@ export default function App() {
 
         {nav==="mods" && <Modulos progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>}
 
+        {nav==="rt" && <RedTeam progresoRT={progresoMods} onCompletarRT={completarLeccion}/>}
+
         {nav==="cq"&&(
           <div style={{ textAlign:"center", paddingTop:60 }}>
             <div style={{ fontSize:48, marginBottom:16 }}>🎮</div>
@@ -236,6 +242,7 @@ export default function App() {
             <div style={{ display:"inline-block", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:8, padding:"12px 24px", color:C.cyan, fontSize:12 }}>🚧 Próximamente</div>
           </div>
         )}
+
       </main>
     </div>
   );
