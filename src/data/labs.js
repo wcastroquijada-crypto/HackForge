@@ -166,4 +166,5 @@ export const FINAL = {
   flag:"HACKFORGE{n3xus_b4nk_0p3r4t10n_c0mpl3t3}",
   xp: 500,
   badge:"🏆 Básico Completado",
-};
+}; 
+ 
