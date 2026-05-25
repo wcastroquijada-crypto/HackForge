@@ -12,12 +12,11 @@ const CSS = `
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
   .fade-in{animation:fadeUp 0.4s ease forwards}
   .cursor::after{content:'▋';animation:blink 0.7s step-end infinite}
-  @keyframes scanline{0%{top:-10%}100%{top:110%}}
-  .terminal-line{font-family:'Courier New',monospace;color:#00ff88;font-size:12px;line-height:1.8}
-  .code-block{background:#050810;border:1px solid #1e2a3a;border-radius:6px;padding:12px 16px;margin:8px 0;font-family:'Courier New',monospace;font-size:12px;color:#00d4ff;line-height:1.8}
+  .mod-card{transition:all .2s;border-radius:10px;padding:20px;cursor:pointer;}
+  .mod-card:hover{transform:translateY(-2px);}
+  .mod-locked{cursor:not-allowed !important;transform:none !important;}
 `;
 
-// Hook typing effect
 function useTyping(text, speed = 35, skip = false) {
   const [displayed, setDisplayed] = useState(skip ? text : "");
   const [done, setDone] = useState(skip);
@@ -35,13 +34,13 @@ function useTyping(text, speed = 35, skip = false) {
 }
 
 export default function RedTeam({ progresoRT, onCompletarRT }) {
-  const [vista, setVista]           = useState("mapa");   // mapa | modulo | leccion | slides | quiz
-  const [modActivo, setModActivo]   = useState(null);
-  const [lecActiva, setLecActiva]   = useState(null);
-  const [slideIdx, setSlideIdx]     = useState(0);
+  const [vista, setVista]         = useState("mapa");
+  const [modActivo, setModActivo] = useState(null);
+  const [lecActiva, setLecActiva] = useState(null);
+  const [slideIdx, setSlideIdx]   = useState(0);
   const [respuestas, setRespuestas] = useState({});
-  const [enviado, setEnviado]       = useState(false);
-  const [skip, setSkip]             = useState(false);
+  const [enviado, setEnviado]     = useState(false);
+  const [skip, setSkip]           = useState(false);
 
   useEffect(() => { setSkip(false); }, [slideIdx, vista]);
 
@@ -68,10 +67,9 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
 
   // ── MAPA PRINCIPAL ──────────────────────────────────────
   if (vista === "mapa") return (
-    <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }} onClick={() => {}}>
+    <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}>
       <style>{CSS}</style>
 
-      {/* Header */}
       <div style={{ marginBottom:28 }}>
         <div style={{ color:"#ff6b35", fontSize:11, letterSpacing:4, marginBottom:6 }}>◈ HACKFORGE // RED TEAM</div>
         <h2 style={{ color:"#fff", fontSize:22, margin:"0 0 6px" }}>Operaciones Red Team</h2>
@@ -81,68 +79,77 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
         </p>
       </div>
 
-      {/* Banner proyecto */}
       <div style={{ background:"#050810", border:"1px solid #ff6b3533", borderRadius:10, padding:20, marginBottom:24 }}>
         <div style={{ color:"#ff6b35", fontSize:10, letterSpacing:3, marginBottom:8 }}>PROYECTO ACTIVO</div>
         <div style={{ display:"flex", gap:20, flexWrap:"wrap" }}>
-          <div>
-            <div style={{ color:C.muted, fontSize:10 }}>CLIENTE</div>
-            <div style={{ color:"#fff", fontSize:14, fontWeight:"bold" }}>Lumina Athletics</div>
-          </div>
-          <div>
-            <div style={{ color:C.muted, fontSize:10 }}>SCOPE</div>
-            <div style={{ color:"#00d4ff", fontSize:12, fontFamily:"monospace" }}>6 objetivos</div>
-          </div>
-          <div>
-            <div style={{ color:C.muted, fontSize:10 }}>PERIODO</div>
-            <div style={{ color:"#fff", fontSize:12 }}>Lun–Vie 09:00–18:00</div>
-          </div>
-          <div>
-            <div style={{ color:C.muted, fontSize:10 }}>RESTRICCIÓN</div>
-            <div style={{ color:"#ff3b3b", fontSize:12 }}>No invasivo · No destructivo</div>
-          </div>
+          <div><div style={{ color:C.muted, fontSize:10 }}>CLIENTE</div><div style={{ color:"#fff", fontSize:14, fontWeight:"bold" }}>Lumina Athletics</div></div>
+          <div><div style={{ color:C.muted, fontSize:10 }}>SCOPE</div><div style={{ color:"#00d4ff", fontSize:12, fontFamily:"monospace" }}>6 objetivos</div></div>
+          <div><div style={{ color:C.muted, fontSize:10 }}>PERIODO</div><div style={{ color:"#fff", fontSize:12 }}>Lun–Vie 09:00–18:00</div></div>
+          <div><div style={{ color:C.muted, fontSize:10 }}>RESTRICCIÓN</div><div style={{ color:"#ff3b3b", fontSize:12 }}>No invasivo · No destructivo</div></div>
         </div>
       </div>
 
-      {/* Grid de módulos */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:14 }}>
         {REDTEAM_MODULOS.map((mod, idx) => {
           const totalLecs = mod.lecciones.length;
           const completadas = (progresoRT?.[mod.id]?.completadas) || 0;
           const porcentaje = Math.round((completadas / totalLecs) * 100);
-          const disponible = idx === 0 || (progresoRT?.[REDTEAM_MODULOS[idx-1].id]?.completadas || 0) > 0;
+          // Primer módulo siempre disponible, el resto se desbloquea al completar lecciones del anterior
+          const desbloqueado = idx === 0 || (progresoRT?.[REDTEAM_MODULOS[idx-1].id]?.completadas || 0) >= REDTEAM_MODULOS[idx-1].lecciones.length;
+          const completado = completadas >= totalLecs;
 
           return (
             <div key={mod.id}
-              className="fade-in"
-              onClick={() => { if (disponible) { setModActivo(mod); setVista("modulo"); }}}
+              className={`fade-in mod-card ${!desbloqueado ? "mod-locked" : ""}`}
+              onClick={() => { if (desbloqueado) { setModActivo(mod); setVista("modulo"); }}}
               style={{
-                background:C.panel, border:`1px solid ${disponible ? C.border : C.border}`,
-                borderRadius:10, padding:20,
-                cursor: disponible ? "pointer" : "not-allowed",
-                opacity: disponible ? 1 : 0.45,
-                animationDelay:`${idx * 80}ms`,
-                transition:"all .2s"
+                background: completado ? `${mod.color}11` : C.panel,
+                border: `1px solid ${completado ? mod.color+"66" : desbloqueado ? C.border : C.border}`,
+                animationDelay:`${idx * 60}ms`,
+                opacity: desbloqueado ? 1 : 0.5,
+                position:"relative",
               }}
-              onMouseEnter={e => disponible && (e.currentTarget.style.borderColor = mod.color+"66")}
-              onMouseLeave={e => disponible && (e.currentTarget.style.borderColor = C.border)}>
+              onMouseEnter={e => desbloqueado && (e.currentTarget.style.borderColor = mod.color+"66")}
+              onMouseLeave={e => desbloqueado && (e.currentTarget.style.borderColor = completado ? mod.color+"66" : C.border)}>
+
+              {/* Candado visible en módulos bloqueados */}
+              {!desbloqueado && (
+                <div style={{ position:"absolute", top:12, right:12, background:"#1e2a3a", borderRadius:6, padding:"4px 8px", fontSize:11, color:C.muted, display:"flex", alignItems:"center", gap:4 }}>
+                  🔒 Bloqueado
+                </div>
+              )}
+
+              {/* Check en módulos completados */}
+              {completado && (
+                <div style={{ position:"absolute", top:12, right:12, background:`${mod.color}22`, borderRadius:6, padding:"4px 8px", fontSize:11, color:mod.color, border:`1px solid ${mod.color}44` }}>
+                  ✓ Completado
+                </div>
+              )}
+
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
                 <span style={{ fontSize:28 }}>{mod.icon}</span>
-                <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+                {!desbloqueado || completado ? null : (
                   <span style={{ background:`${mod.color}22`, color:mod.color, fontSize:9, padding:"2px 8px", borderRadius:3, border:`1px solid ${mod.color}44` }}>{mod.tag}</span>
-                  {!disponible && <span style={{ color:C.muted, fontSize:12 }}>🔒</span>}
-                </div>
+                )}
               </div>
-              <div style={{ color:"#fff", fontWeight:"bold", fontSize:15, marginBottom:4 }}>{mod.nombre}</div>
+
+              <div style={{ color: desbloqueado ? "#fff" : C.muted, fontWeight:"bold", fontSize:15, marginBottom:4 }}>{mod.nombre}</div>
               <div style={{ color:C.muted, fontSize:12, marginBottom:12, lineHeight:1.5 }}>{mod.descripcion}</div>
               <div style={{ color:C.muted, fontSize:11, marginBottom:6 }}>{mod.lecciones.length} lecciones</div>
+
               <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:C.muted, marginBottom:6 }}>
                 <span>{completadas}/{totalLecs} completadas</span>
-                <span style={{ color:mod.color }}>{porcentaje}%</span>
+                <span style={{ color: desbloqueado ? mod.color : C.muted }}>{porcentaje}%</span>
               </div>
               <div style={{ height:3, background:C.border, borderRadius:2, overflow:"hidden" }}>
                 <div style={{ height:"100%", width:`${porcentaje}%`, background:mod.color, borderRadius:2, transition:"width 0.5s" }}/>
               </div>
+
+              {!desbloqueado && idx > 0 && (
+                <div style={{ color:C.muted, fontSize:11, marginTop:10, textAlign:"center" }}>
+                  Completa "{REDTEAM_MODULOS[idx-1].nombre}" para desbloquear
+                </div>
+              )}
             </div>
           );
         })}
@@ -166,8 +173,7 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
         {modActivo.lecciones.map((lec, i) => {
           const done = progresoRT?.[modActivo.id]?.leccionesId?.includes(lec.id);
           return (
-            <div key={lec.id}
-              className="fade-in"
+            <div key={lec.id} className="fade-in"
               onClick={() => abrirLeccion(lec)}
               style={{ background:C.panel, border:`1px solid ${done ? modActivo.color+"44" : C.border}`, borderRadius:8, padding:18, cursor:"pointer", display:"flex", alignItems:"center", gap:16, animationDelay:`${i*60}ms`, transition:"all .15s" }}
               onMouseEnter={e => e.currentTarget.style.borderColor = modActivo.color+"66"}
@@ -198,7 +204,6 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
       <div onClick={e => e.stopPropagation()}>
         <button className="btn" onClick={() => setVista("modulo")} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← Lecciones</button>
 
-        {/* Header slide */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
           <div>
             <div style={{ color:modActivo.color, fontSize:10, letterSpacing:3 }}>{slide.tag} · {slideIdx+1}/{lecActiva.slides.length}</div>
@@ -212,23 +217,24 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
           </div>
         </div>
 
-        {/* Contenido */}
         <div className="fade-in" key={`slide-${slideIdx}`}
           style={{ background:C.panel, border:`1px solid ${modActivo.color}33`, borderRadius:10, padding:28, marginBottom:20, opacity:0, animationDelay:skip?"0ms":"150ms" }}>
           <div style={{ borderLeft:`3px solid ${modActivo.color}`, paddingLeft:20 }}>
             {slide.contenido.split("\n").map((line, i) => {
               if (line === "") return <br key={i}/>;
-              const isCmd = /^(nmap|curl|nc |dig |ssh |find |cat |sudo |python|msfvenom|feroxbuster|ffuf|subfinder|amass|whois|gobuster|hashcat|john|hydra|sqlmap|linpeas|winpeas|impacket|netstat|ss |ping|traceroute|wget|bash |id$|uname|hostname|whoami|echo|export|stty)/.test(line.trim());
-              const isBullet = /^(—|→|✓|✗|🔴|🟡|🟢|📌|⚠️|💀|✅)/.test(line.trim());
+              const isCmd = /^(nmap|curl|nc |dig |ssh |find |cat |sudo |python|Get-|msfvenom|feroxbuster|ffuf|subfinder|amass|whois|gobuster|hashcat|john|hydra|sqlmap|linpeas|winpeas|impacket|crackmapexec|bloodhound|SharpHound|secretsdump|mimikatz|netstat|ss |ping|traceroute|wget|bash |id$|uname|hostname|whoami|echo|export|stty|icacls|wmic|net |ipconfig|systeminfo|PrintSpoofer|JuicyPotato|GetUserSPNs|for i in)/.test(line.trim());
+              const isBullet = /^(—|→|✓|✗|⚠️|✅|PASO|TÉCNICA|HERRAMIENTA|RESULTADO|PRERREQUISITO|EJECUCIÓN|POR QUÉ|MITIGACIÓN|EN EL INFORME|ESTRUCTURA|COMPONENTES|BASE)/.test(line.trim());
+              const isTitle = /^[A-ZÁÉÍÓÚ\s]+:$/.test(line.trim()) && line.trim().length < 40;
               return (
                 <p key={i} style={{
                   margin:"4px 0",
                   fontFamily: isCmd ? "'Courier New',monospace" : "'Inter',sans-serif",
                   background: isCmd ? "#050810" : "transparent",
-                  color: isCmd ? modActivo.color : isBullet ? "#c9d1d9" : "#8b949e",
+                  color: isCmd ? modActivo.color : isTitle ? "#fff" : isBullet ? "#c9d1d9" : "#8b949e",
                   padding: isCmd ? "3px 10px" : "0",
                   borderRadius: isCmd ? 4 : 0,
-                  fontSize: isCmd ? 12 : 13,
+                  fontSize: isCmd ? 12 : isTitle ? 13 : 13,
+                  fontWeight: isTitle ? "bold" : "normal",
                   lineHeight: 1.85,
                 }}>
                   {line}
@@ -238,7 +244,6 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
           </div>
         </div>
 
-        {/* Nav */}
         <div style={{ display:"flex", justifyContent:"space-between" }}>
           <button className="btn" onClick={() => setSlideIdx(p => Math.max(0,p-1))} disabled={slideIdx===0}
             style={{ background:C.dim, color:C.muted, padding:"10px 20px", fontSize:13 }}>← Anterior</button>
@@ -283,7 +288,15 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
               </button>
             );
           })}
-          {enviado && <div style={{ color:C.muted, fontSize:12, marginTop:10, paddingLeft:10, borderLeft:`2px solid ${C.border}`, lineHeight:1.6 }}>💡 {q.e}</div>}
+          {/* Justificación siempre visible al enviar */}
+          {enviado && (
+            <div style={{ background: respuestas[qi]===q.c ? "#002200" : "#0d1117", border:`1px solid ${respuestas[qi]===q.c ? C.green+"44" : "#ff3b3b44"}`, borderRadius:6, padding:"10px 14px", marginTop:10 }}>
+              <div style={{ color: respuestas[qi]===q.c ? C.green : "#ff6b35", fontSize:11, fontWeight:"bold", marginBottom:4 }}>
+                {respuestas[qi]===q.c ? "✓ Correcto" : "✗ Incorrecto"}
+              </div>
+              <div style={{ color:"#c9d1d9", fontSize:12, lineHeight:1.7 }}>💡 {q.e}</div>
+            </div>
+          )}
         </div>
       ))}
 
@@ -297,14 +310,14 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
             <div style={{ fontSize:36, marginBottom:10 }}>{puntaje()>=70 ? "🎯" : "📚"}</div>
             <div style={{ color:puntaje()>=70?C.green:C.red, fontSize:30, fontWeight:"bold" }}>{puntaje()}%</div>
             <div style={{ color:C.muted, fontSize:13, marginTop:6 }}>
-              {puntaje()>=70 ? "¡Lección completada!" : "Necesitas 70% para completar. Repasa los slides."}
+              {puntaje()>=70 ? "¡Lección completada! Sigue al siguiente." : "Necesitas 70% para completar. Repasa los slides."}
             </div>
             <div style={{ display:"flex", gap:10, justifyContent:"center", marginTop:16 }}>
               <button className="btn" onClick={() => { setRespuestas({}); setEnviado(false); }}
                 style={{ background:C.dim, color:C.muted, padding:"10px 20px", fontSize:13 }}>Reintentar</button>
               {puntaje()>=70 &&
                 <button className="btn" onClick={completarLeccion}
-                  style={{ background:C.green, color:"#000", padding:"10px 20px", fontSize:13 }}>✓ Completar</button>
+                  style={{ background:C.green, color:"#000", padding:"10px 20px", fontSize:13 }}>✓ Completar lección</button>
               }
             </div>
           </div>
