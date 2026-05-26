@@ -1575,5 +1575,3 @@ DCSync exitoso = compromiso total del dominio. Impacto: Crítico. Todas las cred
     ]
   },
 ];
-   
- 
