@@ -1,4 +1,4 @@
-﻿// src/data/redteam.js
+// src/data/redteam.js
 // HACKFORGE — Red Team
 // Basado en contenido propio de HACKFORGE con enfoque práctico
 
