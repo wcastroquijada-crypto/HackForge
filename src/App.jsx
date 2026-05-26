@@ -19,6 +19,115 @@ function useLocalStorage(key, initialValue) {
   return [value, setValue];
 }
 
+// ── LOGIN COMPONENT ──────────────────────────────────────
+function Login({ onLogin }) {
+  const [modo, setModo]       = useState("login"); // "login" | "register"
+  const [email, setEmail]     = useState("");
+  const [pass, setPass]       = useState("");
+  const [nombre, setNombre]   = useState("");
+  const [error, setError]     = useState("");
+
+  const getUsers = () => {
+    try { return JSON.parse(localStorage.getItem("hf_users") || "{}"); } catch { return {}; }
+  };
+
+  const handleLogin = () => {
+    setError("");
+    if (!email || !pass) { setError("Completa todos los campos."); return; }
+    const users = getUsers();
+    const user = users[email.toLowerCase()];
+    if (!user) { setError("No existe una cuenta con ese email."); return; }
+    if (user.pass !== pass) { setError("Contraseña incorrecta."); return; }
+    localStorage.setItem("hf_session", JSON.stringify({ email: email.toLowerCase(), nombre: user.nombre }));
+    onLogin({ email: email.toLowerCase(), nombre: user.nombre });
+  };
+
+  const handleRegister = () => {
+    setError("");
+    if (!nombre || !email || !pass) { setError("Completa todos los campos."); return; }
+    if (!email.includes("@")) { setError("Email inválido."); return; }
+    if (pass.length < 6) { setError("La contraseña debe tener al menos 6 caracteres."); return; }
+    const users = getUsers();
+    if (users[email.toLowerCase()]) { setError("Ya existe una cuenta con ese email."); return; }
+    users[email.toLowerCase()] = { nombre, pass };
+    localStorage.setItem("hf_users", JSON.stringify(users));
+    localStorage.setItem("hf_session", JSON.stringify({ email: email.toLowerCase(), nombre }));
+    onLogin({ email: email.toLowerCase(), nombre });
+  };
+
+  return (
+    <div style={{ minHeight:"100vh", background:"#07090f", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", padding:16 }}>
+      <div style={{ width:"100%", maxWidth:400 }}>
+
+        {/* Logo */}
+        <div style={{ textAlign:"center", marginBottom:32 }}>
+          <div style={{ color:"#00d4ff", fontSize:11, letterSpacing:6, marginBottom:8 }}>◈ HACKFORGE</div>
+          <h1 style={{ color:"#fff", fontSize:26, fontWeight:"bold", margin:"0 0 6px" }}>
+            {modo === "login" ? "Iniciar sesión" : "Crear cuenta"}
+          </h1>
+          <p style={{ color:"#8b949e", fontSize:13 }}>
+            {modo === "login" ? "Bienvenido de vuelta, hacker." : "Únete a la plataforma."}
+          </p>
+        </div>
+
+        {/* Card */}
+        <div style={{ background:"#0d1117", border:"1px solid #1e2a3a", borderRadius:12, padding:28 }}>
+
+          {modo === "register" && (
+            <div style={{ marginBottom:16 }}>
+              <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>NOMBRE</label>
+              <input value={nombre} onChange={e => setNombre(e.target.value)}
+                placeholder="Tu nombre"
+                style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
+            </div>
+          )}
+
+          <div style={{ marginBottom:16 }}>
+            <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>EMAIL</label>
+            <input value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="tu@email.com" type="email"
+              onKeyDown={e => e.key === "Enter" && (modo === "login" ? handleLogin() : handleRegister())}
+              style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
+          </div>
+
+          <div style={{ marginBottom:20 }}>
+            <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>CONTRASEÑA</label>
+            <input value={pass} onChange={e => setPass(e.target.value)}
+              placeholder={modo === "register" ? "Mínimo 6 caracteres" : "••••••••"} type="password"
+              onKeyDown={e => e.key === "Enter" && (modo === "login" ? handleLogin() : handleRegister())}
+              style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
+          </div>
+
+          {error && (
+            <div style={{ background:"#1a0505", border:"1px solid #ff3b3b44", borderRadius:6, padding:"10px 14px", marginBottom:16, color:"#ff6b6b", fontSize:12 }}>
+              ❌ {error}
+            </div>
+          )}
+
+          <button onClick={modo === "login" ? handleLogin : handleRegister}
+            style={{ width:"100%", background:"#00d4ff", color:"#000", border:"none", padding:"12px", borderRadius:6, fontSize:14, fontWeight:"bold", cursor:"pointer", fontFamily:"'Inter',sans-serif", transition:"all .15s" }}
+            onMouseEnter={e => e.target.style.filter = "brightness(1.1)"}
+            onMouseLeave={e => e.target.style.filter = "brightness(1)"}>
+            {modo === "login" ? "Entrar →" : "Crear cuenta →"}
+          </button>
+
+          <div style={{ textAlign:"center", marginTop:18, color:"#8b949e", fontSize:12 }}>
+            {modo === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
+            <span onClick={() => { setModo(modo === "login" ? "register" : "login"); setError(""); }}
+              style={{ color:"#00d4ff", cursor:"pointer", textDecoration:"underline" }}>
+              {modo === "login" ? "Regístrate" : "Inicia sesión"}
+            </span>
+          </div>
+        </div>
+
+        <p style={{ color:"#8b949e", fontSize:11, textAlign:"center", marginTop:16 }}>
+          🔒 Datos guardados localmente en tu navegador
+        </p>
+      </div>
+    </div>
+  );
+}
+
 const CSS = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #07090f; font-family: 'Inter', sans-serif; }
@@ -41,20 +150,27 @@ const CSS = `
 `;
 
 export default function App() {
+  const [session, setSession] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("hf_session") || "null"); } catch { return null; }
+  });
+
   const [nav, setNav]             = useState("dash");
   const [labView, setLabView]     = useState("map");
   const [activeLab, setActiveLab] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [doneLabs,  setDoneLabs]  = useLocalStorage("hf_doneLabs",  []);
-  const [labsXp,    setLabsXp]    = useLocalStorage("hf_labsXp",    0);
-  const [flStep,    setFlStep]    = useLocalStorage("hf_flStep",     0);
-  const [flInputs,  setFlInputs]  = useLocalStorage("hf_flInputs",  {});
-  const [flResults, setFlResults] = useLocalStorage("hf_flResults", {});
-  const [flDone,    setFlDone]    = useLocalStorage("hf_flDone",    false);
-  const [streak,    setStreak]    = useLocalStorage("hf_streak",    0);
-  const [lastVisit, setLastVisit] = useLocalStorage("hf_lastVisit", null);
-  const [progresoMods, setProgresoMods] = useLocalStorage("hf_progresoMods", {});
+  // Clave de progreso por usuario
+  const userKey = session ? session.email.replace(/[^a-z0-9]/g, "_") : "guest";
+
+  const [doneLabs,  setDoneLabs]  = useLocalStorage(`hf_doneLabs_${userKey}`,  []);
+  const [labsXp,    setLabsXp]    = useLocalStorage(`hf_labsXp_${userKey}`,    0);
+  const [flStep,    setFlStep]    = useLocalStorage(`hf_flStep_${userKey}`,     0);
+  const [flInputs,  setFlInputs]  = useLocalStorage(`hf_flInputs_${userKey}`,  {});
+  const [flResults, setFlResults] = useLocalStorage(`hf_flResults_${userKey}`, {});
+  const [flDone,    setFlDone]    = useLocalStorage(`hf_flDone_${userKey}`,    false);
+  const [streak,    setStreak]    = useLocalStorage(`hf_streak_${userKey}`,    0);
+  const [lastVisit, setLastVisit] = useLocalStorage(`hf_lastVisit_${userKey}`, null);
+  const [progresoMods, setProgresoMods] = useLocalStorage(`hf_progresoMods_${userKey}`, {});
   const totalXp = 1240 + labsXp;
 
   useEffect(() => {
@@ -98,7 +214,13 @@ export default function App() {
     if (window.confirm("¿Resetear todo el progreso?")) {
       setDoneLabs([]); setLabsXp(0); setFlStep(0);
       setFlInputs({}); setFlResults({}); setFlDone(false); setStreak(0);
+      setProgresoMods({});
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("hf_session");
+    setSession(null);
   };
 
   const handleNav = (id) => {
@@ -106,6 +228,9 @@ export default function App() {
     if (id === "labs") setLabView("map");
     setSidebarOpen(false);
   };
+
+  // ── PANTALLA DE LOGIN ──
+  if (!session) return <Login onLogin={setSession} />;
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:C.bg, color:"#c9d1d9" }}>
@@ -121,7 +246,9 @@ export default function App() {
         <div style={{ marginBottom:20, paddingBottom:16, borderBottom:`1px solid ${C.border}` }}>
           <div style={{ color:C.cyan, fontSize:10, letterSpacing:4 }}>◈ HACKFORGE</div>
           <div style={{ color:"#fff", fontSize:15, fontWeight:"bold", marginTop:4 }}>Base Operaciones</div>
-          <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>CYBER ANALYST · Lv.3</div>
+          <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>
+            {session.nombre} · Lv.3
+          </div>
         </div>
 
         <div style={{ marginBottom:18, padding:"10px 12px", background:C.bg, borderRadius:6, border:`1px solid ${C.border}` }}>
@@ -152,8 +279,11 @@ export default function App() {
         ))}
 
         <div style={{ marginTop:"auto" }}>
-          <button onClick={resetProgress} style={{ width:"100%", background:"transparent", border:`1px solid ${C.border}`, color:C.muted, padding:"6px", borderRadius:4, fontSize:10, cursor:"pointer", marginBottom:10 }}>
+          <button onClick={resetProgress} style={{ width:"100%", background:"transparent", border:`1px solid ${C.border}`, color:C.muted, padding:"6px", borderRadius:4, fontSize:10, cursor:"pointer", marginBottom:8 }}>
             🔄 Resetear progreso
+          </button>
+          <button onClick={handleLogout} style={{ width:"100%", background:"transparent", border:`1px solid #ff3b3b44`, color:"#ff6b6b", padding:"6px", borderRadius:4, fontSize:10, cursor:"pointer", marginBottom:10 }}>
+            🚪 Cerrar sesión
           </button>
           <div style={{ padding:"10px 12px", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:6, fontSize:11 }}>
             <div style={{ color:C.cyan, fontWeight:"bold" }}>⚡ PLAN PRO</div>
