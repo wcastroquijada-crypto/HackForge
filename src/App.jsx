@@ -1,373 +1,577 @@
 import { useState, useEffect } from "react";
-import Dashboard from "./components/Dashboard/Dashboard";
-import LabMap from "./components/Labs/LabMap";
-import LabDetail from "./components/Labs/LabDetail";
-import { C, FINAL } from "./data/labs";
-import Modulos from "./components/Modulos/Modulos";
-import RedTeam from "./components/RedTeam/RedTeam";
-import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
-function useLocalStorage(key, initialValue) {
-  const [value, setValue] = useState(() => {
-    try {
-      const stored = localStorage.getItem(key);
-      return stored ? JSON.parse(stored) : initialValue;
-    } catch { return initialValue; }
-  });
-  useEffect(() => {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-  }, [key, value]);
-  return [value, setValue];
+
+/* ─── PALETA ─────────────────────────────────────────────────── */
+const C = {
+  bg:     "#040c18",
+  panel:  "#071628",
+  border: "#0a2540",
+  cyan:   "#00d4ff",
+  green:  "#00ff88",
+  red:    "#ff3366",
+  muted:  "#4a7a9b",
+  text:   "#cdd9e5",
+};
+
+/* ─── DATOS: MÓDULOS / RUTA CIBERSEGURIDAD ───────────────────── */
+const MODULOS = [
+  {
+    id: "m1", icon: "🌐", titulo: "Fundamentos de Redes",
+    lecciones: [
+      { id:"l1", titulo:"Internet 101",          xp:50 },
+      { id:"l2", titulo:"HTTP y HTTPS",           xp:50 },
+      { id:"l3", titulo:"DNS",                    xp:50 },
+      { id:"l4", titulo:"TCP y UDP",              xp:50 },
+      { id:"l5", titulo:"Modelo OSI",             xp:60 },
+      { id:"l6", titulo:"Puertos y Servicios",    xp:60 },
+    ],
+  },
+  {
+    id: "m2", icon: "🐧", titulo: "Linux para Seguridad",
+    lecciones: [
+      { id:"l7",  titulo:"Terminal básica",       xp:60 },
+      { id:"l8",  titulo:"Permisos y usuarios",   xp:70 },
+      { id:"l9",  titulo:"Procesos y servicios",  xp:70 },
+      { id:"l10", titulo:"Redes en Linux",        xp:80 },
+    ],
+  },
+  {
+    id: "m3", icon: "🕵️", titulo: "Reconocimiento",
+    bloqueado: true,
+    lecciones: [
+      { id:"l11", titulo:"OSINT básico",          xp:80 },
+      { id:"l12", titulo:"Nmap",                  xp:90 },
+      { id:"l13", titulo:"Whois y Shodan",        xp:90 },
+    ],
+  },
+  {
+    id: "m4", icon: "🔓", titulo: "Vulnerabilidades Web",
+    bloqueado: true,
+    lecciones: [
+      { id:"l14", titulo:"SQL Injection",         xp:100 },
+      { id:"l15", titulo:"XSS",                   xp:100 },
+      { id:"l16", titulo:"CSRF",                  xp:100 },
+    ],
+  },
+];
+
+/* ─── DATOS: CODEQUEST MISIONES ──────────────────────────────── */
+const CQ_MISIONES = [
+  {
+    id:"cq1", icono:"🔍", titulo:"Escáner de Puertos",
+    dificultad:"Fácil", xp:80, lenguaje:"Python",
+    descripcion:"Escribe un script que escanee los puertos 1-1024 de una IP y liste los que están abiertos.",
+    pistas:["Usa el módulo socket", "Prueba socket.connect_ex()", "Un timeout de 0.5s evita esperas largas"],
+    solucion:`import socket\ndef escanear(ip):\n    abiertos = []\n    for p in range(1, 1025):\n        s = socket.socket()\n        s.settimeout(0.5)\n        if s.connect_ex((ip, p)) == 0:\n            abiertos.append(p)\n        s.close()\n    return abiertos\nprint(escanear("127.0.0.1"))`,
+  },
+  {
+    id:"cq2", icono:"🔐", titulo:"Cifrado César",
+    dificultad:"Fácil", xp:60, lenguaje:"Python",
+    descripcion:"Implementa el cifrado César: desplaza cada letra del mensaje N posiciones en el alfabeto.",
+    pistas:["Usa ord() y chr()", "Recuerda manejar mayúsculas y minúsculas", "El módulo 26 te ayuda a hacer el ciclo"],
+    solucion:`def cesar(msg, n):\n    r = ""\n    for c in msg:\n        if c.isalpha():\n            b = ord('A') if c.isupper() else ord('a')\n            r += chr((ord(c) - b + n) % 26 + b)\n        else:\n            r += c\n    return r\nprint(cesar("Hola Mundo", 3))`,
+  },
+  {
+    id:"cq3", icono:"🌐", titulo:"Analizador de Headers HTTP",
+    dificultad:"Medio", xp:100, lenguaje:"Python",
+    descripcion:"Haz un GET a una URL y muestra todos los headers de seguridad que contiene la respuesta (X-Frame-Options, CSP, HSTS, etc.).",
+    pistas:["Usa el módulo requests", "response.headers es un dict", "Filtra por nombres que incluyan 'security', 'x-', 'strict'"],
+    solucion:`import requests\ndef analizar(url):\n    r = requests.get(url, timeout=5)\n    seg = ["content-security-policy","strict-transport-security",\n           "x-frame-options","x-content-type-options","x-xss-protection"]\n    for h in seg:\n        val = r.headers.get(h, "❌ No encontrado")\n        print(f"{h}: {val}")\nanalizar("https://example.com")`,
+  },
+  {
+    id:"cq4", icono:"💾", titulo:"Generador de Hashes",
+    dificultad:"Fácil", xp:70, lenguaje:"Python",
+    descripcion:"Dado un texto, genera su hash en MD5, SHA-1 y SHA-256 e imprímelos.",
+    pistas:["Usa hashlib", "Necesitas .encode() antes de hashear", "hashlib.md5(), hashlib.sha1(), hashlib.sha256()"],
+    solucion:`import hashlib\ndef hashes(txt):\n    b = txt.encode()\n    print("MD5:   ", hashlib.md5(b).hexdigest())\n    print("SHA1:  ", hashlib.sha1(b).hexdigest())\n    print("SHA256:", hashlib.sha256(b).hexdigest())\nhashes("hackforge")`,
+  },
+  {
+    id:"cq5", icono:"🛡️", titulo:"Detector de SQL Injection",
+    dificultad:"Medio", xp:120, lenguaje:"Python",
+    descripcion:"Escribe una función que reciba un string y detecte si contiene patrones típicos de SQL Injection.",
+    pistas:["Busca palabras clave: OR, UNION, SELECT, DROP", "Las comillas simples son sospechosas", "Usa expresiones regulares o comparaciones simples"],
+    solucion:`import re\ndef detectar_sqli(inp):\n    patrones = [r"(\\bOR\\b|\\bUNION\\b|\\bSELECT\\b|\\bDROP\\b)",\n                r"['\"]\\s*(--|#|/\\*)", r"1\\s*=\\s*1"]\n    for p in patrones:\n        if re.search(p, inp, re.IGNORECASE):\n            return "⚠️ Posible SQLi detectado"\n    return "✅ Input limpio"\nprint(detectar_sqli("' OR 1=1 --"))`,
+  },
+];
+
+/* ─── COMPONENTE: SIDEBAR ────────────────────────────────────── */
+function Sidebar({ nav, setNav, plan, xp, sidebarOpen, setSidebarOpen }) {
+  const items = [
+    { id:"dash",  icon:"⬡",  label:"Base Ops"         },
+    { id:"mods",  icon:"🗺️", label:"Ruta Ciber"        },
+    { id:"cq",    icon:"🎮", label:"CodeQuest"         },
+    { id:"ccna",  icon:"📡", label:"CCNA Prep"         },
+  ];
+  const go = (id) => { setNav(id); setSidebarOpen(false); };
+  return (
+    <>
+      {/* Overlay móvil */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position:"fixed", inset:0, background:"rgba(0,0,0,0.6)",
+            zIndex:99, display:"none",
+          }}
+          className="mob-overlay"
+        />
+      )}
+      <nav style={{
+        width:220, minHeight:"100vh", background:C.panel,
+        borderRight:`1px solid ${C.border}`, display:"flex",
+        flexDirection:"column", padding:"24px 0", position:"fixed",
+        top:0, left:0, zIndex:100,
+        transition:"transform 0.28s ease",
+      }} className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
+        {/* Logo */}
+        <div style={{ padding:"0 20px 24px", borderBottom:`1px solid ${C.border}` }}>
+          <div style={{ color:C.cyan, fontFamily:"'Orbitron',sans-serif",
+            fontSize:15, fontWeight:700, letterSpacing:3 }}>HACK<span style={{color:"#fff"}}>FORGE</span></div>
+          <div style={{ color:C.muted, fontSize:10, marginTop:4, letterSpacing:2 }}>
+            {plan === "pro" ? "⚡ PRO" : "FREE"} · {xp} XP
+          </div>
+        </div>
+        {/* Nav items */}
+        <div style={{ flex:1, paddingTop:16 }}>
+          {items.map(it => (
+            <button key={it.id} onClick={() => go(it.id)} style={{
+              display:"flex", alignItems:"center", gap:12,
+              width:"100%", padding:"11px 20px", background:"none", border:"none",
+              cursor:"pointer", color: nav===it.id ? C.cyan : C.text,
+              borderLeft: nav===it.id ? `3px solid ${C.cyan}` : "3px solid transparent",
+              fontSize:13, textAlign:"left", transition:"all 0.15s",
+            }}>
+              <span style={{fontSize:16}}>{it.icon}</span>
+              <span style={{fontFamily:"'Share Tech Mono',monospace"}}>{it.label}</span>
+            </button>
+          ))}
+        </div>
+        {/* Footer */}
+        <div style={{ padding:"16px 20px", borderTop:`1px solid ${C.border}`,
+          color:C.muted, fontSize:10, fontFamily:"monospace" }}>
+          v1.0 · HACKFORGE LATAM
+        </div>
+      </nav>
+      {/* Estilos responsive inline */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+        .sidebar { transform: translateX(0); }
+        .mob-overlay { display: none !important; }
+        @media (max-width: 768px) {
+          .sidebar { transform: translateX(-100%); }
+          .sidebar.sidebar-open { transform: translateX(0) !important; }
+          .mob-overlay { display: block !important; }
+        }
+      `}</style>
+    </>
+  );
 }
 
-// ── LOGIN COMPONENT ──────────────────────────────────────
-function Login({ onLogin }) {
-  const [modo, setModo]       = useState("login"); // "login" | "register"
-  const [email, setEmail]     = useState("");
-  const [pass, setPass]       = useState("");
-  const [nombre, setNombre]   = useState("");
-  const [error, setError]     = useState("");
-
-  const getUsers = () => {
-    try { return JSON.parse(localStorage.getItem("hf_users") || "{}"); } catch { return {}; }
-  };
-
-  const handleLogin = () => {
-    setError("");
-    if (!email || !pass) { setError("Completa todos los campos."); return; }
-    const users = getUsers();
-    const user = users[email.toLowerCase()];
-    if (!user) { setError("No existe una cuenta con ese email."); return; }
-    if (user.pass !== pass) { setError("Contraseña incorrecta."); return; }
-    localStorage.setItem("hf_session", JSON.stringify({ email: email.toLowerCase(), nombre: user.nombre }));
-    onLogin({ email: email.toLowerCase(), nombre: user.nombre });
-  };
-
-  const handleRegister = () => {
-    setError("");
-    if (!nombre || !email || !pass) { setError("Completa todos los campos."); return; }
-    if (!email.includes("@")) { setError("Email inválido."); return; }
-    if (pass.length < 6) { setError("La contraseña debe tener al menos 6 caracteres."); return; }
-    const users = getUsers();
-    if (users[email.toLowerCase()]) { setError("Ya existe una cuenta con ese email."); return; }
-    users[email.toLowerCase()] = { nombre, pass };
-    localStorage.setItem("hf_users", JSON.stringify(users));
-    localStorage.setItem("hf_session", JSON.stringify({ email: email.toLowerCase(), nombre }));
-    onLogin({ email: email.toLowerCase(), nombre });
-  };
-
+/* ─── COMPONENTE: HEADER MÓVIL ───────────────────────────────── */
+function MobileHeader({ sidebarOpen, setSidebarOpen }) {
   return (
-    <div style={{ minHeight:"100vh", background:"#07090f", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", padding:16 }}>
-      <div style={{ width:"100%", maxWidth:400 }}>
+    <div style={{
+      display:"none", position:"fixed", top:0, left:0, right:0, zIndex:98,
+      background:C.panel, borderBottom:`1px solid ${C.border}`,
+      padding:"12px 16px", alignItems:"center", gap:12,
+    }} className="mob-header">
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{
+        background:"none", border:`1px solid ${C.border}`, color:C.cyan,
+        borderRadius:6, padding:"6px 10px", cursor:"pointer", fontSize:18,
+      }}>☰</button>
+      <span style={{ color:C.cyan, fontFamily:"'Orbitron',sans-serif",
+        fontSize:13, fontWeight:700, letterSpacing:3 }}>
+        HACK<span style={{color:"#fff"}}>FORGE</span>
+      </span>
+      <style>{`
+        @media (max-width: 768px) { .mob-header { display: flex !important; } }
+      `}</style>
+    </div>
+  );
+}
 
-        {/* Logo */}
-        <div style={{ textAlign:"center", marginBottom:32 }}>
-          <div style={{ color:"#00d4ff", fontSize:11, letterSpacing:6, marginBottom:8 }}>◈ HACKFORGE</div>
-          <h1 style={{ color:"#fff", fontSize:26, fontWeight:"bold", margin:"0 0 6px" }}>
-            {modo === "login" ? "Iniciar sesión" : "Crear cuenta"}
-          </h1>
-          <p style={{ color:"#8b949e", fontSize:13 }}>
-            {modo === "login" ? "Bienvenido de vuelta, hacker." : "Únete a la plataforma."}
-          </p>
-        </div>
-
-        {/* Card */}
-        <div style={{ background:"#0d1117", border:"1px solid #1e2a3a", borderRadius:12, padding:28 }}>
-
-          {modo === "register" && (
-            <div style={{ marginBottom:16 }}>
-              <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>NOMBRE</label>
-              <input value={nombre} onChange={e => setNombre(e.target.value)}
-                placeholder="Tu nombre"
-                style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
+/* ─── COMPONENTE: DASHBOARD ──────────────────────────────────── */
+function Dashboard({ xp, plan, modulos, progreso }) {
+  const totalLec = modulos.reduce((a,m) => a + m.lecciones.length, 0);
+  const completadas = Object.values(progreso).filter(Boolean).length;
+  const stats = [
+    { label:"XP Total", val: xp },
+    { label:"Lecciones", val: `${completadas}/${totalLec}` },
+    { label:"Plan", val: plan === "pro" ? "PRO ⚡" : "FREE" },
+    { label:"Racha", val: "3 días 🔥" },
+  ];
+  return (
+    <div>
+      <div style={{ color:C.cyan, fontSize:10, letterSpacing:4,
+        fontFamily:"monospace", marginBottom:8 }}>HACKFORGE // BASE DE OPERACIONES</div>
+      <h1 style={{ color:"#fff", fontSize:22, marginBottom:24,
+        fontFamily:"'Orbitron',sans-serif" }}>Base de Operaciones</h1>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",
+        gap:12, marginBottom:28 }}>
+        {stats.map(s => (
+          <div key={s.label} style={{ background:C.panel, border:`1px solid ${C.border}`,
+            borderRadius:8, padding:"16px", textAlign:"center" }}>
+            <div style={{ color:C.cyan, fontSize:20, fontFamily:"'Orbitron',sans-serif",
+              fontWeight:700 }}>{s.val}</div>
+            <div style={{ color:C.muted, fontSize:11, marginTop:4 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+      {/* Módulos rápidos */}
+      <div style={{ color:C.muted, fontSize:11, letterSpacing:2,
+        marginBottom:12, fontFamily:"monospace" }}>MÓDULOS DISPONIBLES</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:12 }}>
+        {modulos.map(m => (
+          <div key={m.id} style={{
+            background:C.panel, border:`1px solid ${m.bloqueado ? C.border : C.cyan+"33"}`,
+            borderRadius:8, padding:"16px", opacity: m.bloqueado ? 0.5 : 1,
+          }}>
+            <div style={{ fontSize:24, marginBottom:8 }}>{m.icon}</div>
+            <div style={{ color:"#fff", fontSize:13, fontWeight:600 }}>{m.titulo}</div>
+            <div style={{ color:C.muted, fontSize:11, marginTop:4 }}>
+              {m.bloqueado ? "🔒 Bloqueado" : `${m.lecciones.length} lecciones`}
             </div>
-          )}
-
-          <div style={{ marginBottom:16 }}>
-            <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>EMAIL</label>
-            <input value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="tu@email.com" type="email"
-              onKeyDown={e => e.key === "Enter" && (modo === "login" ? handleLogin() : handleRegister())}
-              style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
           </div>
-
-          <div style={{ marginBottom:20 }}>
-            <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>CONTRASEÑA</label>
-            <input value={pass} onChange={e => setPass(e.target.value)}
-              placeholder={modo === "register" ? "Mínimo 6 caracteres" : "••••••••"} type="password"
-              onKeyDown={e => e.key === "Enter" && (modo === "login" ? handleLogin() : handleRegister())}
-              style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
-          </div>
-
-          {error && (
-            <div style={{ background:"#1a0505", border:"1px solid #ff3b3b44", borderRadius:6, padding:"10px 14px", marginBottom:16, color:"#ff6b6b", fontSize:12 }}>
-              ❌ {error}
-            </div>
-          )}
-
-          <button onClick={modo === "login" ? handleLogin : handleRegister}
-            style={{ width:"100%", background:"#00d4ff", color:"#000", border:"none", padding:"12px", borderRadius:6, fontSize:14, fontWeight:"bold", cursor:"pointer", fontFamily:"'Inter',sans-serif", transition:"all .15s" }}
-            onMouseEnter={e => e.target.style.filter = "brightness(1.1)"}
-            onMouseLeave={e => e.target.style.filter = "brightness(1)"}>
-            {modo === "login" ? "Entrar →" : "Crear cuenta →"}
-          </button>
-
-          <div style={{ textAlign:"center", marginTop:18, color:"#8b949e", fontSize:12 }}>
-            {modo === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
-            <span onClick={() => { setModo(modo === "login" ? "register" : "login"); setError(""); }}
-              style={{ color:"#00d4ff", cursor:"pointer", textDecoration:"underline" }}>
-              {modo === "login" ? "Regístrate" : "Inicia sesión"}
-            </span>
-          </div>
-        </div>
-
-        <p style={{ color:"#8b949e", fontSize:11, textAlign:"center", marginTop:16 }}>
-          🔒 Datos guardados localmente en tu navegador
-        </p>
+        ))}
       </div>
     </div>
   );
 }
 
-const CSS = `
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #07090f; font-family: 'Inter', sans-serif; }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-thumb { background: #1e2a3a; border-radius: 2px; }
-  .nav-item { cursor: pointer; padding: 10px 14px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 13px; transition: all .18s; border: 1px solid transparent; }
-  .nav-item:hover { background: #111827; border-color: #1e2a3a; }
-  .btn { cursor: pointer; border: none; font-family: 'Inter', sans-serif; font-weight: bold; transition: all .15s; border-radius: 5px; }
-  .btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
-  .btn:disabled { opacity: .45; cursor: not-allowed; }
-  .hamburger { display: none; position: fixed; top: 12px; left: 12px; z-index: 1000; background: #0d1117; border: 1px solid #1e2a3a; color: #8b949e; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 18px; line-height: 1; }
-  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 998; }
-  @media (max-width: 768px) {
-    .hamburger { display: block; }
-    .sidebar { position: fixed !important; top: 0; left: 0; height: 100vh; z-index: 999; transform: translateX(-100%); transition: transform 0.25s ease; }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-overlay.open { display: block; }
-    .main-content { padding: 16px !important; padding-top: 52px !important; }
-  }
-`;
-
-export default function App() {
-  const [session, setSession] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("hf_session") || "null"); } catch { return null; }
-  });
-
-  const [nav, setNav]             = useState("dash");
-  const [labView, setLabView]     = useState("map");
-  const [activeLab, setActiveLab] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Clave de progreso por usuario
-  const userKey = session ? session.email.replace(/[^a-z0-9]/g, "_") : "guest";
-
-  const [doneLabs,  setDoneLabs]  = useLocalStorage(`hf_doneLabs_${userKey}`,  []);
-  const [labsXp,    setLabsXp]    = useLocalStorage(`hf_labsXp_${userKey}`,    0);
-  const [flStep,    setFlStep]    = useLocalStorage(`hf_flStep_${userKey}`,     0);
-  const [flInputs,  setFlInputs]  = useLocalStorage(`hf_flInputs_${userKey}`,  {});
-  const [flResults, setFlResults] = useLocalStorage(`hf_flResults_${userKey}`, {});
-  const [flDone,    setFlDone]    = useLocalStorage(`hf_flDone_${userKey}`,    false);
-  const [streak,    setStreak]    = useLocalStorage(`hf_streak_${userKey}`,    0);
-  const [lastVisit, setLastVisit] = useLocalStorage(`hf_lastVisit_${userKey}`, null);
-  const [progresoMods, setProgresoMods] = useLocalStorage(`hf_progresoMods_${userKey}`, {});
-  const totalXp = 1240 + labsXp;
-
-  useEffect(() => {
-    const today = new Date().toDateString();
-    if (lastVisit !== today) {
-      const yesterday = new Date(Date.now() - 86400000).toDateString();
-      setStreak(s => lastVisit === yesterday ? s + 1 : 1);
-      setLastVisit(today);
-    }
-  }, []);
-
-  const openLab   = (lab) => { setActiveLab(lab); setLabView("detail"); };
-  const backToMap = ()    => { setActiveLab(null); setLabView("map"); };
-
-  const completeLab = (id, xp) => {
-    if (!doneLabs.includes(id)) {
-      setDoneLabs(p => [...p, id]);
-      setLabsXp(p => p + xp);
-    }
-  };
-
-  const submitFinal = (i) => {
-    const ok = FINAL.objectives[i].ok(flInputs[i] || "");
-    setFlResults(p => ({ ...p, [i]: ok ? "ok" : "fail" }));
-    if (ok) {
-      if (i === 3) setTimeout(() => { setFlDone(true); setLabsXp(p => p + FINAL.xp); }, 500);
-      else setTimeout(() => setFlStep(i + 1), 400);
-    }
-  };
-
-  const completarLeccion = (modId, lecId, xp) => {
-    setProgresoMods(p => {
-      const mod = p[modId] || { completadas:0, leccionesId:[] };
-      if (mod.leccionesId.includes(lecId)) return p;
-      return { ...p, [modId]: { completadas: mod.completadas+1, leccionesId:[...mod.leccionesId, lecId] }};
-    });
-    setLabsXp(prev => prev + xp);
-  };
-
-  const resetProgress = () => {
-    if (window.confirm("¿Resetear todo el progreso?")) {
-      setDoneLabs([]); setLabsXp(0); setFlStep(0);
-      setFlInputs({}); setFlResults({}); setFlDone(false); setStreak(0);
-      setProgresoMods({});
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("hf_session");
-    setSession(null);
-  };
-
-  const handleNav = (id) => {
-    setNav(id);
-    if (id === "labs") setLabView("map");
-    setSidebarOpen(false);
-  };
-
-  // ── PANTALLA DE LOGIN ──
-  if (!session) return <Login onLogin={setSession} />;
-
+/* ─── COMPONENTE: MÓDULOS / RUTA ─────────────────────────────── */
+function Modulos({ modulos, progreso, onCompletar }) {
+  const [activo, setActivo] = useState(null);
   return (
-    <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:C.bg, color:"#c9d1d9" }}>
-      <style>{CSS}</style>
-
-      <button className="hamburger" onClick={() => setSidebarOpen(o => !o)}>
-        {sidebarOpen ? "✕" : "☰"}
-      </button>
-
-      <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
-
-      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} style={{ width:210, background:C.panel, borderRight:`1px solid ${C.border}`, display:"flex", flexDirection:"column", padding:"16px 12px", flexShrink:0, overflowY:"auto" }}>
-        <div style={{ marginBottom:20, paddingBottom:16, borderBottom:`1px solid ${C.border}` }}>
-          <div style={{ color:C.cyan, fontSize:10, letterSpacing:4 }}>◈ HACKFORGE</div>
-          <div style={{ color:"#fff", fontSize:15, fontWeight:"bold", marginTop:4 }}>Base Operaciones</div>
-          <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>
-            {session.nombre} · Lv.3
-          </div>
-        </div>
-
-        <div style={{ marginBottom:18, padding:"10px 12px", background:C.bg, borderRadius:6, border:`1px solid ${C.border}` }}>
-          <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:C.muted, marginBottom:5 }}>
-            <span style={{ color:C.cyan }}>{totalXp} XP</span><span>2000 XP</span>
-          </div>
-          <div style={{ height:4, background:C.border, borderRadius:2, overflow:"hidden" }}>
-            <div style={{ height:"100%", width:`${Math.min(100,(totalXp/2000)*100)}%`, background:`linear-gradient(to right,${C.cyan},${C.green})`, borderRadius:2, transition:"width 0.5s" }}/>
-          </div>
-          <div style={{ color:C.muted, fontSize:10, marginTop:4 }}>🔥 Racha: {streak} días</div>
-        </div>
-
-        {[
-          { id:"dash", icon:"🏠", label:"Dashboard"  },
-          { id:"labs", icon:"⚗️",  label:"Labs"       },
-          { id:"mods", icon:"📚", label:"Módulos"    },
-          { id:"rt",   icon:"🔴", label:"Red Team"   },
-          { id:"cq",   icon:"🎮", label:"CodeQuest"  },
-          { id:"ccna", icon:"📡", label:"CCNA Prep"  },
-        ].map(n=>(
-          <div key={n.id} className="nav-item"
-            onClick={() => handleNav(n.id)}
-            style={{ color:nav===n.id?"#fff":C.muted, background:nav===n.id?`${C.cyan}18`:"transparent", borderColor:nav===n.id?`${C.cyan}44`:"transparent" }}>
-            <span style={{ fontSize:16 }}>{n.icon}</span>
-            <span>{n.label}</span>
-            {n.id==="labs"&&doneLabs.length>0&&<span style={{ marginLeft:"auto", color:C.green, fontSize:10 }}>{doneLabs.length}✓</span>}
-          </div>
-        ))}
-
-        <div style={{ marginTop:"auto" }}>
-          <button onClick={resetProgress} style={{ width:"100%", background:"transparent", border:`1px solid ${C.border}`, color:C.muted, padding:"6px", borderRadius:4, fontSize:10, cursor:"pointer", marginBottom:8 }}>
-            🔄 Resetear progreso
-          </button>
-          <button onClick={handleLogout} style={{ width:"100%", background:"transparent", border:`1px solid #ff3b3b44`, color:"#ff6b6b", padding:"6px", borderRadius:4, fontSize:10, cursor:"pointer", marginBottom:10 }}>
-            🚪 Cerrar sesión
-          </button>
-          <div style={{ padding:"10px 12px", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:6, fontSize:11 }}>
-            <div style={{ color:C.cyan, fontWeight:"bold" }}>⚡ PLAN PRO</div>
-            <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>Acceso completo</div>
-          </div>
-        </div>
-      </aside>
-
-      <main className="main-content" style={{ flex:1, overflowY:"auto", padding:"24px" }}>
-
-        {nav==="dash" && <Dashboard totalXp={totalXp} doneLabs={doneLabs} labsXp={labsXp} streak={streak} onNav={setNav}/>}
-
-        {nav==="labs" && labView==="map" && <LabMap doneLabs={doneLabs} labsXp={labsXp} onOpenLab={openLab} onOpenFinal={()=>setLabView("final")} flDone={flDone}/>}
-
-        {nav==="labs" && labView==="detail" && activeLab && <LabDetail lab={activeLab} onBack={backToMap} onComplete={completeLab}/>}
-
-        {nav==="labs" && labView==="final" && (
-          <div style={{ maxWidth:720, margin:"0 auto" }}>
-            <button className="btn" onClick={backToMap} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← Volver al mapa</button>
-            <div style={{ textAlign:"center", marginBottom:28 }}>
-              <div style={{ fontSize:44, marginBottom:10 }}>🏦</div>
-              <div style={{ color:C.yellow, fontSize:11, letterSpacing:4 }}>OPERACIÓN FINAL</div>
-              <h2 style={{ color:"#fff", fontSize:20, margin:"8px 0" }}>OPERACIÓN: NEXUS BANK</h2>
-              <p style={{ color:C.muted, fontSize:12 }}>Compromete NexusBank usando las 4 técnicas en secuencia.</p>
-            </div>
-            {FINAL.objectives.map((obj,i)=>{
-              const unlocked=i<=flStep; const ok=flResults[i]==="ok";
-              return (
-                <div key={i} style={{ marginBottom:12, background:C.panel, border:`1px solid ${ok?C.green:unlocked?C.yellow:C.border}`, borderRadius:8, padding:20, opacity:unlocked?1:0.35 }}>
-                  <div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:ok?0:14 }}>
-                    <span style={{ fontSize:22 }}>{obj.icon}</span>
-                    <div style={{ flex:1 }}>
-                      <div style={{ color:ok?C.green:C.yellow, fontSize:10, letterSpacing:2 }}>OBJETIVO {i+1} — {obj.tech}</div>
-                      <div style={{ color:"#fff", fontWeight:"bold", fontSize:15 }}>{obj.title}</div>
-                      <div style={{ color:C.muted, fontSize:12 }}>{obj.desc}</div>
-                    </div>
-                    {ok&&<span style={{ color:C.green, fontSize:20 }}>✓</span>}
-                  </div>
-                  {unlocked&&!ok&&(
-                    <div style={{ display:"flex", gap:8 }}>
-                      <input value={flInputs[i]||""} onChange={e=>setFlInputs(p=>({...p,[i]:e.target.value}))} placeholder={obj.ph} onKeyDown={e=>e.key==="Enter"&&submitFinal(i)}
-                        style={{ flex:1, background:"#050810", border:`1px solid ${C.border}`, color:C.cyan, padding:"10px 12px", borderRadius:5, fontFamily:"'Courier New',monospace", fontSize:12, outline:"none" }}/>
-                      <button className="btn" onClick={()=>submitFinal(i)} style={{ background:C.yellow, color:"#000", padding:"10px 16px", fontSize:12 }}>Ejecutar</button>
-                    </div>
-                  )}
-                  {flResults[i]==="fail"&&<div style={{ color:C.red, fontSize:11, marginTop:8 }}>❌ Incorrecto. Revisa el lab correspondiente.</div>}
+    <div>
+      <div style={{ color:C.cyan, fontSize:10, letterSpacing:4,
+        fontFamily:"monospace", marginBottom:8 }}>HACKFORGE // RUTA CIBERSEGURIDAD</div>
+      <h2 style={{ color:"#fff", fontSize:20, marginBottom:20,
+        fontFamily:"'Orbitron',sans-serif" }}>Ruta Ciberseguridad</h2>
+      {modulos.map(m => (
+        <div key={m.id} style={{ marginBottom:16 }}>
+          <div style={{ background:C.panel, border:`1px solid ${C.border}`,
+            borderRadius:8, padding:"16px", opacity: m.bloqueado ? 0.5 : 1 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
+              <span style={{fontSize:24}}>{m.icon}</span>
+              <div>
+                <div style={{ color:"#fff", fontWeight:600 }}>{m.titulo}</div>
+                <div style={{ color:C.muted, fontSize:11 }}>
+                  {m.bloqueado ? "🔒 Completa el módulo anterior" :
+                    `${m.lecciones.filter(l => progreso[l.id]).length}/${m.lecciones.length} completadas`}
                 </div>
-              );
-            })}
-            {flDone&&(
-              <div style={{ background:"#051a0a", border:`2px solid ${C.green}`, borderRadius:10, padding:28, textAlign:"center", marginTop:20 }}>
-                <div style={{ fontSize:40, marginBottom:10 }}>🏆</div>
-                <div style={{ color:C.green, fontSize:14, letterSpacing:3, marginBottom:8 }}>¡OPERACIÓN COMPLETADA!</div>
-                <div style={{ color:"#fff", fontSize:18, fontWeight:"bold", marginBottom:14 }}>Nivel Básico Superado</div>
-                <div style={{ background:"#050810", border:`1px solid ${C.green}44`, padding:10, borderRadius:5, marginBottom:14 }}>
-                  <div style={{ color:C.muted, fontSize:10, marginBottom:3 }}>🚩 FLAG FINAL</div>
-                  <div style={{ color:C.green, fontSize:12, wordBreak:"break-all" }}>{FINAL.flag}</div>
-                </div>
-                <div style={{ color:C.yellow, fontSize:13 }}>+{FINAL.xp} XP · {FINAL.badge}</div>
-                <button className="btn" onClick={backToMap} style={{ background:C.green, color:"#000", padding:"11px 22px", fontSize:13, marginTop:14 }}>← Volver al mapa</button>
               </div>
-            )}
+            </div>
+            {!m.bloqueado && m.lecciones.map(l => (
+              <div key={l.id} onClick={() => !progreso[l.id] && onCompletar(l.id, l.xp)}
+                style={{
+                  display:"flex", alignItems:"center", justifyContent:"space-between",
+                  padding:"8px 12px", borderRadius:6, marginBottom:6, cursor:"pointer",
+                  background: progreso[l.id] ? `${C.green}11` : `${C.cyan}08`,
+                  border:`1px solid ${progreso[l.id] ? C.green+"33" : C.border}`,
+                }}>
+                <span style={{ color: progreso[l.id] ? C.green : C.text, fontSize:13 }}>
+                  {progreso[l.id] ? "✓" : "○"} {l.titulo}
+                </span>
+                <span style={{ color:C.muted, fontSize:11 }}>+{l.xp} XP</span>
+              </div>
+            ))}
           </div>
-        )}
-
-        {nav==="mods" && <Modulos progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>}
-
-        {nav==="rt" && <RedTeam progresoRT={progresoMods} onCompletarRT={completarLeccion}/>}
-
-        {nav==="cq"&&(
-          <div style={{ textAlign:"center", paddingTop:60 }}>
-            <div style={{ fontSize:48, marginBottom:16 }}>🎮</div>
-            <div style={{ color:C.cyan, fontSize:11, letterSpacing:4, marginBottom:8 }}>HACKFORGE // CODEQUEST</div>
-            <h2 style={{ color:"#fff", fontSize:20, marginBottom:12 }}>CodeQuest</h2>
-            <p style={{ color:C.muted, fontSize:13, maxWidth:400, margin:"0 auto 24px" }}>Próximamente: Misiones de hacking en código con XP, teoría y retos progresivos.</p>
-            <div style={{ display:"inline-block", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:8, padding:"12px 24px", color:C.cyan, fontSize:12 }}>🚧 Próximamente</div>
-          </div>
-        )}
-
-        {nav==="ccna" && <CCNAPrep />}
-
-      </main>
+        </div>
+      ))}
     </div>
   );
 }
 
+/* ─── COMPONENTE: CODEQUEST ──────────────────────────────────── */
+function CodeQuest({ misiones, progresoMisiones, onCompletar }) {
+  const [seleccionada, setSeleccionada] = useState(null);
+  const [mostrarSol, setMostrarSol] = useState(false);
+  const [mostrarPistas, setMostrarPistas] = useState(false);
 
+  if (seleccionada) {
+    const m = misiones.find(x => x.id === seleccionada);
+    const completada = progresoMisiones[m.id];
+    return (
+      <div>
+        <button onClick={() => { setSeleccionada(null); setMostrarSol(false); setMostrarPistas(false); }}
+          style={{ background:"none", border:`1px solid ${C.border}`, color:C.cyan,
+            borderRadius:6, padding:"6px 14px", cursor:"pointer", fontSize:12, marginBottom:20 }}>
+          ← Volver
+        </button>
+        <div style={{ color:C.cyan, fontSize:10, letterSpacing:4, fontFamily:"monospace",
+          marginBottom:8 }}>CODEQUEST // {m.lenguaje}</div>
+        <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
+          <span style={{fontSize:32}}>{m.icono}</span>
+          <div>
+            <h2 style={{ color:"#fff", fontSize:18, fontFamily:"'Orbitron',sans-serif" }}>{m.titulo}</h2>
+            <div style={{ display:"flex", gap:8, marginTop:4 }}>
+              <span style={{ background:`${C.cyan}22`, color:C.cyan, fontSize:11,
+                padding:"2px 8px", borderRadius:4 }}>{m.dificultad}</span>
+              <span style={{ background:`${C.green}22`, color:C.green, fontSize:11,
+                padding:"2px 8px", borderRadius:4 }}>+{m.xp} XP</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ background:C.panel, border:`1px solid ${C.border}`,
+          borderRadius:8, padding:20, marginBottom:16 }}>
+          <div style={{ color:C.muted, fontSize:11, marginBottom:8, fontFamily:"monospace",
+            letterSpacing:2 }}>MISIÓN</div>
+          <p style={{ color:C.text, fontSize:14, lineHeight:1.7 }}>{m.descripcion}</p>
+        </div>
+        {/* Pistas */}
+        <button onClick={() => setMostrarPistas(!mostrarPistas)}
+          style={{ background:mostrarPistas ? `${C.cyan}22` : "none",
+            border:`1px solid ${C.cyan}44`, color:C.cyan,
+            borderRadius:6, padding:"8px 16px", cursor:"pointer",
+            fontSize:12, marginBottom:12, width:"100%" }}>
+          💡 {mostrarPistas ? "Ocultar pistas" : "Ver pistas"}
+        </button>
+        {mostrarPistas && (
+          <div style={{ background:C.panel, border:`1px solid ${C.cyan}33`,
+            borderRadius:8, padding:16, marginBottom:12 }}>
+            {m.pistas.map((p,i) => (
+              <div key={i} style={{ color:C.text, fontSize:13, padding:"6px 0",
+                borderBottom: i < m.pistas.length-1 ? `1px solid ${C.border}` : "none" }}>
+                <span style={{color:C.cyan}}>▸</span> {p}
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Solución */}
+        <button onClick={() => setMostrarSol(!mostrarSol)}
+          style={{ background:mostrarSol ? `${C.red}22` : "none",
+            border:`1px solid ${C.red}44`, color:C.red,
+            borderRadius:6, padding:"8px 16px", cursor:"pointer",
+            fontSize:12, marginBottom:12, width:"100%" }}>
+          👁 {mostrarSol ? "Ocultar solución" : "Ver solución (spoiler)"}
+        </button>
+        {mostrarSol && (
+          <div style={{ background:"#010810", border:`1px solid ${C.border}`,
+            borderRadius:8, padding:16, marginBottom:16 }}>
+            <div style={{ display:"flex", gap:6, marginBottom:12 }}>
+              {["#ff5f57","#ffbd2e","#28c940"].map(col => (
+                <div key={col} style={{ width:10, height:10, borderRadius:"50%", background:col }}/>
+              ))}
+            </div>
+            <pre style={{ color:C.green, fontFamily:"'Share Tech Mono',monospace",
+              fontSize:12, margin:0, whiteSpace:"pre-wrap", lineHeight:1.7 }}>
+              {m.solucion}
+            </pre>
+          </div>
+        )}
+        {!completada && (
+          <button onClick={() => onCompletar(m.id, m.xp)}
+            style={{ background:C.cyan, color:"#000", border:"none",
+              borderRadius:8, padding:"12px 24px", cursor:"pointer",
+              fontWeight:700, fontSize:14, width:"100%" }}>
+            ✓ Marcar como completada (+{m.xp} XP)
+          </button>
+        )}
+        {completada && (
+          <div style={{ background:`${C.green}22`, border:`1px solid ${C.green}44`,
+            borderRadius:8, padding:"12px 24px", textAlign:"center",
+            color:C.green, fontSize:14, fontWeight:600 }}>
+            ✅ ¡Misión completada!
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ color:C.cyan, fontSize:10, letterSpacing:4,
+        fontFamily:"monospace", marginBottom:8 }}>HACKFORGE // CODEQUEST</div>
+      <h2 style={{ color:"#fff", fontSize:20, fontFamily:"'Orbitron',sans-serif",
+        marginBottom:8 }}>CodeQuest</h2>
+      <p style={{ color:C.muted, fontSize:13, marginBottom:24 }}>
+        Misiones de código con enfoque en ciberseguridad. Cada misión sube tu XP y habilidad real.
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:14 }}>
+        {misiones.map(m => {
+          const comp = progresoMisiones[m.id];
+          return (
+            <div key={m.id} onClick={() => setSeleccionada(m.id)}
+              style={{ background:C.panel, border:`1px solid ${comp ? C.green+"44" : C.border}`,
+                borderRadius:10, padding:18, cursor:"pointer", transition:"border-color 0.2s",
+              }}>
+              <div style={{ display:"flex", justifyContent:"space-between",
+                alignItems:"flex-start", marginBottom:10 }}>
+                <span style={{fontSize:28}}>{m.icono}</span>
+                {comp && <span style={{color:C.green, fontSize:18}}>✅</span>}
+              </div>
+              <div style={{ color:"#fff", fontWeight:600, fontSize:14, marginBottom:6 }}>
+                {m.titulo}
+              </div>
+              <div style={{ color:C.muted, fontSize:12, marginBottom:10, lineHeight:1.5 }}>
+                {m.descripcion.slice(0,80)}...
+              </div>
+              <div style={{ display:"flex", gap:6 }}>
+                <span style={{ background:`${C.cyan}22`, color:C.cyan,
+                  fontSize:11, padding:"2px 8px", borderRadius:4 }}>{m.dificultad}</span>
+                <span style={{ background:`${C.green}22`, color:C.green,
+                  fontSize:11, padding:"2px 8px", borderRadius:4 }}>+{m.xp} XP</span>
+                <span style={{ background:`${C.border}`, color:C.muted,
+                  fontSize:11, padding:"2px 8px", borderRadius:4 }}>{m.lenguaje}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── APP PRINCIPAL ──────────────────────────────────────────── */
+export default function App() {
+  const [logueado, setLogueado] = useState(false);
+  const [usuario,  setUsuario]  = useState("");
+  const [plan,     setPlan]     = useState("free");
+  const [inputU,   setInputU]   = useState("");
+  const [inputP,   setInputP]   = useState("");
+  const [nav,      setNav]      = useState("dash");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // XP y progreso
+  const [xp, setXp] = useState(0);
+  const [progresoLec, setProgresoLec] = useState({});
+  const [progresoMisiones, setProgresoMisiones] = useState({});
+
+  useEffect(() => {
+    const saved = localStorage.getItem("hf_user");
+    if (saved) {
+      const d = JSON.parse(saved);
+      setLogueado(true);
+      setUsuario(d.usuario);
+      setPlan(d.plan || "free");
+      setXp(d.xp || 0);
+      setProgresoLec(d.progresoLec || {});
+      setProgresoMisiones(d.progresoMisiones || {});
+    }
+  }, []);
+
+  const guardar = (data) => localStorage.setItem("hf_user", JSON.stringify(data));
+
+  const login = () => {
+    if (!inputU || !inputP) return;
+    const data = { usuario: inputU, plan, xp:0, progresoLec:{}, progresoMisiones:{} };
+    guardar(data);
+    setUsuario(inputU); setXp(0); setProgresoLec({}); setProgresoMisiones({});
+    setLogueado(true);
+  };
+
+  const completarLeccion = (id, pts) => {
+    if (progresoLec[id]) return;
+    const nl = { ...progresoLec, [id]: true };
+    const nx = xp + pts;
+    setProgresoLec(nl); setXp(nx);
+    guardar({ usuario, plan, xp: nx, progresoLec: nl, progresoMisiones });
+  };
+
+  const completarMision = (id, pts) => {
+    if (progresoMisiones[id]) return;
+    const nm = { ...progresoMisiones, [id]: true };
+    const nx = xp + pts;
+    setProgresoMisiones(nm); setXp(nx);
+    guardar({ usuario, plan, xp: nx, progresoLec, progresoMisiones: nm });
+  };
+
+  /* ─ PANTALLA LOGIN ─ */
+  if (!logueado) return (
+    <div style={{ minHeight:"100vh", background:C.bg, display:"flex",
+      alignItems:"center", justifyContent:"center", padding:20 }}>
+      <div style={{ background:C.panel, border:`1px solid ${C.border}`,
+        borderRadius:12, padding:"36px 32px", width:"100%", maxWidth:380 }}>
+        <div style={{ textAlign:"center", marginBottom:28 }}>
+          <div style={{ color:C.cyan, fontFamily:"'Orbitron',sans-serif",
+            fontSize:22, fontWeight:700, letterSpacing:4 }}>
+            HACK<span style={{color:"#fff"}}>FORGE</span>
+          </div>
+          <div style={{ color:C.muted, fontSize:12, marginTop:6, letterSpacing:2 }}>
+            PLATAFORMA CIBER · LATAM
+          </div>
+        </div>
+        {[
+          { label:"Usuario", val:inputU, set:setInputU, type:"text" },
+          { label:"Contraseña", val:inputP, set:setInputP, type:"password" },
+        ].map(f => (
+          <div key={f.label} style={{ marginBottom:14 }}>
+            <div style={{ color:C.muted, fontSize:11, marginBottom:6,
+              fontFamily:"monospace" }}>{f.label}</div>
+            <input type={f.type} value={f.val}
+              onChange={e => f.set(e.target.value)}
+              style={{ width:"100%", background:C.bg, border:`1px solid ${C.border}`,
+                borderRadius:6, padding:"10px 12px", color:"#fff",
+                fontSize:13, outline:"none", boxSizing:"border-box",
+                fontFamily:"'Share Tech Mono',monospace" }}/>
+          </div>
+        ))}
+        <div style={{ marginBottom:20 }}>
+          <div style={{ color:C.muted, fontSize:11, marginBottom:8,
+            fontFamily:"monospace" }}>Plan</div>
+          <div style={{ display:"flex", gap:8 }}>
+            {["free","pro"].map(p => (
+              <button key={p} onClick={() => setPlan(p)} style={{
+                flex:1, padding:"9px", borderRadius:6, cursor:"pointer",
+                background: plan===p ? C.cyan : "none",
+                border: `1px solid ${plan===p ? C.cyan : C.border}`,
+                color: plan===p ? "#000" : C.text,
+                fontWeight: plan===p ? 700 : 400, fontSize:13,
+              }}>
+                {p === "pro" ? "⚡ PRO" : "FREE"}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button onClick={login} style={{
+          width:"100%", background:C.cyan, color:"#000", border:"none",
+          borderRadius:8, padding:"12px", cursor:"pointer",
+          fontWeight:700, fontSize:14, fontFamily:"'Orbitron',sans-serif",
+          letterSpacing:2,
+        }}>ENTRAR</button>
+      </div>
+    </div>
+  );
+
+  /* ─ PANTALLA PRINCIPAL ─ */
+  return (
+    <div style={{ minHeight:"100vh", background:C.bg, color:C.text }}>
+      <MobileHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <Sidebar nav={nav} setNav={setNav} plan={plan} xp={xp}
+        sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <main style={{ marginLeft:220, padding:"32px 28px", minHeight:"100vh" }}
+        className="main-content">
+        <style>{`
+          @media (max-width: 768px) {
+            .main-content { margin-left: 0 !important; padding: 80px 16px 24px !important; }
+          }
+        `}</style>
+
+        {nav === "dash" && (
+          <Dashboard xp={xp} plan={plan} modulos={MODULOS} progreso={progresoLec} />
+        )}
+        {nav === "mods" && (
+          <Modulos modulos={MODULOS} progreso={progresoLec} onCompletar={completarLeccion} />
+        )}
+        {nav === "cq" && (
+          <CodeQuest misiones={CQ_MISIONES} progresoMisiones={progresoMisiones}
+            onCompletar={completarMision} />
+        )}
+        {nav === "ccna" && (
+          <div style={{ textAlign:"center", paddingTop:60 }}>
+            <div style={{ fontSize:48, marginBottom:16 }}>📡</div>
+            <div style={{ color:C.cyan, fontSize:11, letterSpacing:4,
+              marginBottom:8, fontFamily:"monospace" }}>HACKFORGE // CCNA PREP</div>
+            <h2 style={{ color:"#fff", fontSize:20, marginBottom:12,
+              fontFamily:"'Orbitron',sans-serif" }}>CCNA Prep Zone</h2>
+            <p style={{ color:C.muted, fontSize:13, maxWidth:400, margin:"0 auto 24px" }}>
+              Próximamente: Preguntas CCNA 200-301, simulador Packet Tracer y flashcards.
+            </p>
+            <div style={{ display:"inline-block", background:`${C.cyan}11`,
+              border:`1px solid ${C.cyan}33`, borderRadius:8,
+              padding:"12px 24px", color:C.cyan, fontSize:12 }}>🚧 En desarrollo</div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
