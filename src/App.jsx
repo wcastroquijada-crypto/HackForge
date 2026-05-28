@@ -5,7 +5,7 @@ import LabDetail from "./components/Labs/LabDetail";
 import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
 import RedTeam from "./components/RedTeam/RedTeam";
-
+import CodeQuest from "./components/CodeQuest/CodeQuest";
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
@@ -353,16 +353,7 @@ export default function App() {
 
         {nav==="rt" && <RedTeam progresoRT={progresoMods} onCompletarRT={completarLeccion}/>}
 
-        {nav==="cq"&&(
-          <div style={{ textAlign:"center", paddingTop:60 }}>
-            <div style={{ fontSize:48, marginBottom:16 }}>🎮</div>
-            <div style={{ color:C.cyan, fontSize:11, letterSpacing:4, marginBottom:8 }}>HACKFORGE // CODEQUEST</div>
-            <h2 style={{ color:"#fff", fontSize:20, marginBottom:12 }}>CodeQuest</h2>
-            <p style={{ color:C.muted, fontSize:13, maxWidth:400, margin:"0 auto 24px" }}>Próximamente: Misiones de hacking en código con XP, teoría y retos progresivos.</p>
-            <div style={{ display:"inline-block", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:8, padding:"12px 24px", color:C.cyan, fontSize:12 }}>🚧 Próximamente</div>
-          </div>
-        )}
-
+{nav==="cq" && <CodeQuest progresoCQ={progresoMods} onCompletarCQ={completarLeccion}/>}
         {nav==="ccna"&&(
           <div style={{ textAlign:"center", paddingTop:60 }}>
             <div style={{ fontSize:48, marginBottom:16 }}>📡</div>
