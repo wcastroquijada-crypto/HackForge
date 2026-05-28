@@ -90,7 +90,7 @@ export default function RedTeam({ progresoRT, onCompletarRT }) {
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:14 }}>
-        {REDTEAM_MODULOS.map((mod, idx) => {
+        {REDTEAM_MODULOS.filter(mod => mod && mod.id).map((mod, idx) => {
           const totalLecs = mod.lecciones.length;
           const completadas = (progresoRT?.[mod.id]?.completadas) || 0;
           const porcentaje = Math.round((completadas / totalLecs) * 100);
