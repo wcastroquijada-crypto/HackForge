@@ -6,7 +6,6 @@ import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
 import RedTeam from "./components/RedTeam/RedTeam";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
-import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
@@ -378,3 +377,4 @@ export default function App() {
     </div>
   );
 }
+
