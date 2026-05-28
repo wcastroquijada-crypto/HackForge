@@ -2,6 +2,74 @@ import { useState, useEffect } from "react";
 import { C } from "../../data/labs";
 import { PREGUNTAS_CCNA, FLASHCARDS, EJERCICIOS_SUBNET } from "../../data/ccna_data";
 
+
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === "correct") {
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start(); osc.stop(ctx.currentTime + 0.5);
+    } else if (type === "wrong") {
+      osc.frequency.setValueAtTime(200, ctx.currentTime);
+      osc.frequency.setValueAtTime(150, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(); osc.stop(ctx.currentTime + 0.4);
+    } else if (type === "click") {
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.start(); osc.stop(ctx.currentTime + 0.08);
+    } else if (type === "flip") {
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start(); osc.stop(ctx.currentTime + 0.2);
+    }
+  } catch {}
+}
+
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === "correct") {
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start(); osc.stop(ctx.currentTime + 0.5);
+    } else if (type === "wrong") {
+      osc.frequency.setValueAtTime(200, ctx.currentTime);
+      osc.frequency.setValueAtTime(150, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(); osc.stop(ctx.currentTime + 0.4);
+    } else if (type === "click") {
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.start(); osc.stop(ctx.currentTime + 0.08);
+    } else if (type === "flip") {
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start(); osc.stop(ctx.currentTime + 0.2);
+    }
+  } catch {}
+}
 const CSS = `
   .ccna-btn{cursor:pointer;border:none;font-family:'Inter',sans-serif;font-weight:bold;transition:all .15s;border-radius:6px}
   .ccna-btn:hover:not(:disabled){filter:brightness(1.15);transform:translateY(-1px)}
@@ -45,7 +113,7 @@ function BancoPregunta({ onBack }) {
     if (enviado) return;
     setRespuesta(idx);
     setEnviado(true);
-    if (idx === preg.correcta) setCorrectas(c => c + 1);
+    if (idx === preg.correcta) { setCorrectas(c => c + 1); playSound("correct"); } else { playSound("wrong"); }
   };
 
   const siguiente = () => {
@@ -64,7 +132,7 @@ function BancoPregunta({ onBack }) {
 
   if (!temaSeleccionado) return (
     <div>
-      <button className="ccna-btn" onClick={onBack} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← CCNA Prep</button>
+      <button className="ccna-btn" onClick={() => { onBack(); playSound("click"); }} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← CCNA Prep</button>
       <div style={{ color:COLOR, fontSize:11, letterSpacing:3, marginBottom:8 }}>BANCO DE PREGUNTAS</div>
       <h3 style={{ color:"#fff", fontSize:18, marginBottom:16 }}>Elige un tema</h3>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))", gap:10 }}>
@@ -146,7 +214,7 @@ function FlashcardsView({ onBack }) {
 
   if (!catSeleccionada) return (
     <div>
-      <button className="ccna-btn" onClick={onBack} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← CCNA Prep</button>
+      <button className="ccna-btn" onClick={() => { onBack(); playSound("click"); }} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← CCNA Prep</button>
       <div style={{ color:COLOR, fontSize:11, letterSpacing:3, marginBottom:8 }}>FLASHCARDS</div>
       <h3 style={{ color:"#fff", fontSize:18, marginBottom:16 }}>Elige una categoría</h3>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:10 }}>
@@ -224,7 +292,7 @@ function SubnettingView({ onBack }) {
 
   return (
     <div style={{ maxWidth:600, margin:"0 auto" }}>
-      <button className="ccna-btn" onClick={onBack} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← CCNA Prep</button>
+      <button className="ccna-btn" onClick={() => { onBack(); playSound("click"); }} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← CCNA Prep</button>
       <div style={{ color:COLOR, fontSize:11, letterSpacing:3, marginBottom:8 }}>CALCULADORA DE SUBNETTING</div>
       <div style={{ background:`${COLOR}11`, border:`2px solid ${COLOR}33`, borderRadius:12, padding:24, textAlign:"center", marginBottom:24 }}>
         <div style={{ color:C.muted, fontSize:12, marginBottom:8 }}>RED A SUBNETEAR:</div>
@@ -300,7 +368,7 @@ function SimulacroView({ onBack }) {
 
   if (!iniciado) return (
     <div style={{ maxWidth:600, margin:"0 auto", textAlign:"center" }}>
-      <button className="ccna-btn" onClick={onBack} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:24, display:"block", textAlign:"left" }}>← CCNA Prep</button>
+      <button className="ccna-btn" onClick={() => { onBack(); playSound("click"); }} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:24, display:"block", textAlign:"left" }}>← CCNA Prep</button>
       <div style={{ fontSize:48, marginBottom:16 }}>📊</div>
       <div style={{ color:COLOR, fontSize:11, letterSpacing:3, marginBottom:8 }}>SIMULACRO DE EXAMEN</div>
       <h2 style={{ color:"#fff", fontSize:22, marginBottom:16 }}>CCNA 200-301</h2>
@@ -428,7 +496,7 @@ export default function CCNAPrep() {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:14 }}>
         {SECCIONES.map((s, i) => (
           <div key={s.id} className="fade-in"
-            onClick={() => setVista(s.id)}
+            onClick={() => { setVista(s.id); playSound("click"); }}
             style={{ background:C.panel, border:`1px solid ${s.color}33`, borderRadius:10, padding:24, cursor:"pointer", animationDelay:`${i*60}ms`, transition:"all .2s" }}
             onMouseEnter={e => { e.currentTarget.style.borderColor=s.color+"66"; e.currentTarget.style.transform="translateY(-2px)"; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor=s.color+"33"; e.currentTarget.style.transform="translateY(0)"; }}>
@@ -442,3 +510,5 @@ export default function CCNAPrep() {
     </div>
   );
 }
+
+
