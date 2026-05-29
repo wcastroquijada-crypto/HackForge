@@ -8,6 +8,7 @@ import RedTeam from "./components/RedTeam/RedTeam";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
 import Pentesting from "./components/Pentesting/Pentesting";
 import CodeQuestComp from "./components/CodeQuest/CodeQuest";
+import CodeQuestComp from "./components/CodeQuest/CodeQuest";
 
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
@@ -465,13 +466,15 @@ export default function App() {
         {nav==="mods" && <Modulos progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>}
         {nav==="rt"   && <RedTeam progresoRT={progresoMods} onCompletarRT={completarLeccion}/>}
         {nav==="pt"   && <Pentesting progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>}
-        {nav==="cq"   && <CodeQuest progresoMisiones={progresoMisiones} onCompletar={completarMision}/>}
+        {nav==="cq" && <CodeQuestComp onCompletarCQ={completarMision}/>}
         {nav==="ccna" && <CCNAPrep />}
 
       </main>
     </div>
   );
 }
+
+
 
 
 
