@@ -338,6 +338,8 @@ export default function App() {
   const [labView, setLabView]     = useState("map");
   const [activeLab, setActiveLab] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [progresoMisiones, setProgresoMisiones] = useState({});
+  const completarMision = (id, pts) => { setProgresoMisiones(prev => ({...prev, [id]: true})); };
 
   // Clave de progreso por usuario
   const userKey = session ? session.email.replace(/[^a-z0-9]/g, "_") : "guest";
@@ -546,6 +548,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
