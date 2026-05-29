@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import Dashboard from "./components/Dashboard/Dashboard";
 import LabMap from "./components/Labs/LabMap";
 import LabDetail from "./components/Labs/LabDetail";
@@ -117,7 +117,7 @@ function Login({ onLogin }) {
 const CQ_MISIONES = [
   { id:"cq1", icono:"[S]", titulo:"Escaner de Puertos", dificultad:"Facil", xp:80, lenguaje:"Python",
     descripcion:"Escribe un script que escanee los puertos 1-1024 de una IP y liste los que estan abiertos.",
-    pistas:["Usa el modulo socket","Prueba socket.connect_ex() — retorna 0 si el puerto esta abierto","Un timeout de 0.5s evita esperas largas"],
+    pistas:["Usa el modulo socket","Prueba socket.connect_ex() â€” retorna 0 si el puerto esta abierto","Un timeout de 0.5s evita esperas largas"],
     solucion:"import socket\ndef escanear(ip):\n    abiertos = []\n    for p in range(1, 1025):\n        s = socket.socket()\n        s.settimeout(0.5)\n        if s.connect_ex((ip, p)) == 0:\n            abiertos.append(p)\n        s.close()\n    return abiertos\nprint(escanear('127.0.0.1'))" },
   { id:"cq2", icono:"[C]", titulo:"Cifrado Cesar", dificultad:"Facil", xp:60, lenguaje:"Python",
     descripcion:"Implementa el cifrado Cesar: desplaza cada letra del mensaje N posiciones en el alfabeto.",
@@ -176,7 +176,7 @@ function CodeQuest({ progresoMisiones, onCompletar }) {
           <div style={{ background:panel, border:`1px solid ${cyan}33`, borderRadius:8, padding:16, marginBottom:10 }}>
             {m.pistas.map((p, i) => (
               <div key={i} style={{ color:text, fontSize:13, padding:"8px 0", borderBottom: i<m.pistas.length-1?`1px solid ${border}`:"none" }}>
-                <span style={{ color:cyan, marginRight:8 }}>></span>{p}
+                <span style={{ color:cyan, marginRight:8 }}>{" > "}</span>{p}
               </div>
             ))}
           </div>
@@ -370,7 +370,7 @@ export default function App() {
         <div style={{ marginBottom:20, paddingBottom:16, borderBottom:`1px solid ${C.border}` }}>
           <div style={{ color:C.cyan, fontSize:10, letterSpacing:4 }}>HACKFORGE</div>
           <div style={{ color:"#fff", fontSize:15, fontWeight:"bold", marginTop:4 }}>Base Operaciones</div>
-          <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>{session.nombre} · Lv.3</div>
+          <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>{session.nombre} Â· Lv.3</div>
         </div>
 
         <div style={{ marginBottom:18, padding:"10px 12px", background:C.bg, borderRadius:6, border:`1px solid ${C.border}` }}>
@@ -429,7 +429,7 @@ export default function App() {
                   <div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:ok?0:14 }}>
                     <span style={{ fontSize:22 }}>{obj.icon}</span>
                     <div style={{ flex:1 }}>
-                      <div style={{ color:ok?C.green:C.yellow, fontSize:10, letterSpacing:2 }}>OBJETIVO {i+1} — {obj.tech}</div>
+                      <div style={{ color:ok?C.green:C.yellow, fontSize:10, letterSpacing:2 }}>OBJETIVO {i+1} â€” {obj.tech}</div>
                       <div style={{ color:"#fff", fontWeight:"bold", fontSize:15 }}>{obj.title}</div>
                       <div style={{ color:C.muted, fontSize:12 }}>{obj.desc}</div>
                     </div>
@@ -454,7 +454,7 @@ export default function App() {
                   <div style={{ color:C.muted, fontSize:10, marginBottom:3 }}>FLAG FINAL</div>
                   <div style={{ color:C.green, fontSize:12, wordBreak:"break-all" }}>{FINAL.flag}</div>
                 </div>
-                <div style={{ color:C.yellow, fontSize:13 }}>+{FINAL.xp} XP · {FINAL.badge}</div>
+                <div style={{ color:C.yellow, fontSize:13 }}>+{FINAL.xp} XP Â· {FINAL.badge}</div>
                 <button className="btn" onClick={backToMap} style={{ background:C.green, color:"#000", padding:"11px 22px", fontSize:13, marginTop:14 }}>Volver al mapa</button>
               </div>
             )}
@@ -471,3 +471,4 @@ export default function App() {
     </div>
   );
 }
+
