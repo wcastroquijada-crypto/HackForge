@@ -7,6 +7,7 @@ import Modulos from "./components/Modulos/Modulos";
 import RedTeam from "./components/RedTeam/RedTeam";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
 import Pentesting from "./components/Pentesting/Pentesting";
+import CodeQuestComp from "./components/CodeQuest/CodeQuest";
 
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
@@ -471,4 +472,6 @@ export default function App() {
     </div>
   );
 }
+
+
 
