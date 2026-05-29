@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Dashboard from "./components/Dashboard/Dashboard";
 import LabMap from "./components/Labs/LabMap";
 import LabDetail from "./components/Labs/LabDetail";
@@ -6,6 +6,7 @@ import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
 import RedTeam from "./components/RedTeam/RedTeam";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
+
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
@@ -19,13 +20,13 @@ function useLocalStorage(key, initialValue) {
   return [value, setValue];
 }
 
-// â”€â”€ LOGIN COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── LOGIN ────────────────────────────────────────────────
 function Login({ onLogin }) {
-  const [modo, setModo]       = useState("login"); // "login" | "register"
-  const [email, setEmail]     = useState("");
-  const [pass, setPass]       = useState("");
-  const [nombre, setNombre]   = useState("");
-  const [error, setError]     = useState("");
+  const [modo, setModo]     = useState("login");
+  const [email, setEmail]   = useState("");
+  const [pass, setPass]     = useState("");
+  const [nombre, setNombre] = useState("");
+  const [error, setError]   = useState("");
 
   const getUsers = () => {
     try { return JSON.parse(localStorage.getItem("hf_users") || "{}"); } catch { return {}; }
@@ -37,7 +38,7 @@ function Login({ onLogin }) {
     const users = getUsers();
     const user = users[email.toLowerCase()];
     if (!user) { setError("No existe una cuenta con ese email."); return; }
-    if (user.pass !== pass) { setError("ContraseÃ±a incorrecta."); return; }
+    if (user.pass !== pass) { setError("Contraseña incorrecta."); return; }
     localStorage.setItem("hf_session", JSON.stringify({ email: email.toLowerCase(), nombre: user.nombre }));
     onLogin({ email: email.toLowerCase(), nombre: user.nombre });
   };
@@ -45,8 +46,8 @@ function Login({ onLogin }) {
   const handleRegister = () => {
     setError("");
     if (!nombre || !email || !pass) { setError("Completa todos los campos."); return; }
-    if (!email.includes("@")) { setError("Email invÃ¡lido."); return; }
-    if (pass.length < 6) { setError("La contraseÃ±a debe tener al menos 6 caracteres."); return; }
+    if (!email.includes("@")) { setError("Email inválido."); return; }
+    if (pass.length < 6) { setError("La contraseña debe tener al menos 6 caracteres."); return; }
     const users = getUsers();
     if (users[email.toLowerCase()]) { setError("Ya existe una cuenta con ese email."); return; }
     users[email.toLowerCase()] = { nombre, pass };
@@ -58,76 +59,257 @@ function Login({ onLogin }) {
   return (
     <div style={{ minHeight:"100vh", background:"#07090f", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", padding:16 }}>
       <div style={{ width:"100%", maxWidth:400 }}>
-
-        {/* Logo */}
         <div style={{ textAlign:"center", marginBottom:32 }}>
-          <div style={{ color:"#00d4ff", fontSize:11, letterSpacing:6, marginBottom:8 }}>â—ˆ HACKFORGE</div>
+          <div style={{ color:"#00d4ff", fontSize:11, letterSpacing:6, marginBottom:8 }}>◈ HACKFORGE</div>
           <h1 style={{ color:"#fff", fontSize:26, fontWeight:"bold", margin:"0 0 6px" }}>
-            {modo === "login" ? "Iniciar sesiÃ³n" : "Crear cuenta"}
+            {modo === "login" ? "Iniciar sesión" : "Crear cuenta"}
           </h1>
           <p style={{ color:"#8b949e", fontSize:13 }}>
-            {modo === "login" ? "Bienvenido de vuelta, hacker." : "Ãšnete a la plataforma."}
+            {modo === "login" ? "Bienvenido de vuelta, hacker." : "Únete a la plataforma."}
           </p>
         </div>
-
-        {/* Card */}
         <div style={{ background:"#0d1117", border:"1px solid #1e2a3a", borderRadius:12, padding:28 }}>
-
           {modo === "register" && (
             <div style={{ marginBottom:16 }}>
               <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>NOMBRE</label>
-              <input value={nombre} onChange={e => setNombre(e.target.value)}
-                placeholder="Tu nombre"
+              <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Tu nombre"
                 style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
             </div>
           )}
-
           <div style={{ marginBottom:16 }}>
             <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>EMAIL</label>
-            <input value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="tu@email.com" type="email"
+            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" type="email"
               onKeyDown={e => e.key === "Enter" && (modo === "login" ? handleLogin() : handleRegister())}
               style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
           </div>
-
           <div style={{ marginBottom:20 }}>
-            <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>CONTRASEÃ‘A</label>
+            <label style={{ color:"#8b949e", fontSize:11, letterSpacing:2, display:"block", marginBottom:6 }}>CONTRASEÑA</label>
             <input value={pass} onChange={e => setPass(e.target.value)}
-              placeholder={modo === "register" ? "MÃ­nimo 6 caracteres" : "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"} type="password"
+              placeholder={modo === "register" ? "Mínimo 6 caracteres" : "••••••••"} type="password"
               onKeyDown={e => e.key === "Enter" && (modo === "login" ? handleLogin() : handleRegister())}
               style={{ width:"100%", background:"#050810", border:"1px solid #1e2a3a", color:"#c9d1d9", padding:"11px 14px", borderRadius:6, fontSize:13, outline:"none", fontFamily:"'Inter',sans-serif" }}/>
           </div>
-
           {error && (
             <div style={{ background:"#1a0505", border:"1px solid #ff3b3b44", borderRadius:6, padding:"10px 14px", marginBottom:16, color:"#ff6b6b", fontSize:12 }}>
-              âŒ {error}
+              ❌ {error}
             </div>
           )}
-
           <button onClick={modo === "login" ? handleLogin : handleRegister}
-            style={{ width:"100%", background:"#00d4ff", color:"#000", border:"none", padding:"12px", borderRadius:6, fontSize:14, fontWeight:"bold", cursor:"pointer", fontFamily:"'Inter',sans-serif", transition:"all .15s" }}
+            style={{ width:"100%", background:"#00d4ff", color:"#000", border:"none", padding:"12px", borderRadius:6, fontSize:14, fontWeight:"bold", cursor:"pointer", fontFamily:"'Inter',sans-serif" }}
             onMouseEnter={e => e.target.style.filter = "brightness(1.1)"}
             onMouseLeave={e => e.target.style.filter = "brightness(1)"}>
-            {modo === "login" ? "Entrar â†’" : "Crear cuenta â†’"}
+            {modo === "login" ? "Entrar →" : "Crear cuenta →"}
           </button>
-
           <div style={{ textAlign:"center", marginTop:18, color:"#8b949e", fontSize:12 }}>
-            {modo === "login" ? "Â¿No tienes cuenta? " : "Â¿Ya tienes cuenta? "}
+            {modo === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
             <span onClick={() => { setModo(modo === "login" ? "register" : "login"); setError(""); }}
               style={{ color:"#00d4ff", cursor:"pointer", textDecoration:"underline" }}>
-              {modo === "login" ? "RegÃ­strate" : "Inicia sesiÃ³n"}
+              {modo === "login" ? "Regístrate" : "Inicia sesión"}
             </span>
           </div>
         </div>
-
         <p style={{ color:"#8b949e", fontSize:11, textAlign:"center", marginTop:16 }}>
-          ðŸ”’ Datos guardados localmente en tu navegador
+          🔒 Datos guardados localmente en tu navegador
         </p>
       </div>
     </div>
   );
 }
 
+// ── CODEQUEST DATA ───────────────────────────────────────
+const CQ_MISIONES = [
+  {
+    id:"cq1", icono:"🔍", titulo:"Escáner de Puertos",
+    dificultad:"Fácil", xp:80, lenguaje:"Python",
+    descripcion:"Escribe un script que escanee los puertos 1-1024 de una IP y liste los que están abiertos.",
+    pistas:["Usa el módulo socket","Prueba socket.connect_ex() — retorna 0 si el puerto está abierto","Un timeout de 0.5s evita esperas largas"],
+    solucion:"import socket\ndef escanear(ip):\n    abiertos = []\n    for p in range(1, 1025):\n        s = socket.socket()\n        s.settimeout(0.5)\n        if s.connect_ex((ip, p)) == 0:\n            abiertos.append(p)\n        s.close()\n    return abiertos\nprint(escanear(\"127.0.0.1\"))",
+  },
+  {
+    id:"cq2", icono:"🔐", titulo:"Cifrado César",
+    dificultad:"Fácil", xp:60, lenguaje:"Python",
+    descripcion:"Implementa el cifrado César: desplaza cada letra del mensaje N posiciones en el alfabeto.",
+    pistas:["Usa ord() y chr() para convertir letras a números","Maneja mayúsculas y minúsculas por separado","El módulo 26 hace el ciclo: (pos + n) % 26"],
+    solucion:"def cesar(msg, n):\n    r = \"\"\n    for c in msg:\n        if c.isalpha():\n            b = ord('A') if c.isupper() else ord('a')\n            r += chr((ord(c) - b + n) % 26 + b)\n        else:\n            r += c\n    return r\nprint(cesar(\"Hola Mundo\", 3))",
+  },
+  {
+    id:"cq3", icono:"🌐", titulo:"Analizador de Headers HTTP",
+    dificultad:"Medio", xp:100, lenguaje:"Python",
+    descripcion:"Haz un GET a una URL y muestra los headers de seguridad presentes en la respuesta (CSP, HSTS, X-Frame-Options, etc).",
+    pistas:["Usa el módulo requests","response.headers es un diccionario","Busca: content-security-policy, strict-transport-security, x-frame-options, x-content-type-options"],
+    solucion:"import requests\ndef analizar(url):\n    r = requests.get(url, timeout=5)\n    seg = [\"content-security-policy\",\"strict-transport-security\",\n           \"x-frame-options\",\"x-content-type-options\",\"x-xss-protection\"]\n    for h in seg:\n        val = r.headers.get(h, \"No encontrado\")\n        print(f\"{h}: {val}\")\nanalizar(\"https://example.com\")",
+  },
+  {
+    id:"cq4", icono:"💾", titulo:"Generador de Hashes",
+    dificultad:"Fácil", xp:70, lenguaje:"Python",
+    descripcion:"Dado un texto, genera su hash en MD5, SHA-1 y SHA-256 e imprímelos.",
+    pistas:["Usa el módulo hashlib","Necesitas .encode() antes de hashear","Métodos: hashlib.md5(), hashlib.sha1(), hashlib.sha256()"],
+    solucion:"import hashlib\ndef hashes(txt):\n    b = txt.encode()\n    print(\"MD5:   \", hashlib.md5(b).hexdigest())\n    print(\"SHA1:  \", hashlib.sha1(b).hexdigest())\n    print(\"SHA256:\", hashlib.sha256(b).hexdigest())\nhashes(\"hackforge\")",
+  },
+  {
+    id:"cq5", icono:"🛡️", titulo:"Detector de SQL Injection",
+    dificultad:"Medio", xp:120, lenguaje:"Python",
+    descripcion:"Escribe una función que reciba un string y detecte si contiene patrones típicos de SQL Injection.",
+    pistas:["Busca palabras clave: OR, UNION, SELECT, DROP","Las comillas simples son sospechosas","Usa expresiones regulares con re.search()"],
+    solucion:"import re\ndef detectar_sqli(inp):\n    patrones = [\n        r\"(\\bOR\\b|\\bUNION\\b|\\bSELECT\\b|\\bDROP\\b)\",\n        r\"['\\\"]\\s*(--|#)\",\n        r\"1\\s*=\\s*1\"\n    ]\n    for p in patrones:\n        if re.search(p, inp, re.IGNORECASE):\n            return \"Posible SQLi detectado\"\n    return \"Input limpio\"\nprint(detectar_sqli(\"' OR 1=1 --\"))",
+  },
+];
+
+// ── CODEQUEST COMPONENT ──────────────────────────────────
+function CodeQuest({ progresoMisiones, onCompletar }) {
+  const [sel, setSel]           = useState(null);
+  const [verSol, setVerSol]     = useState(false);
+  const [verPistas, setVerPistas] = useState(false);
+
+  const cyan  = "#00d4ff";
+  const green = "#00ff88";
+  const red   = "#ff3366";
+  const panel = "#0d1117";
+  const border= "#1e2a3a";
+  const muted = "#8b949e";
+  const text  = "#c9d1d9";
+
+  if (sel) {
+    const m = CQ_MISIONES.find(x => x.id === sel);
+    const comp = progresoMisiones[m.id];
+    return (
+      <div style={{ maxWidth:720, margin:"0 auto" }}>
+        <button onClick={() => { setSel(null); setVerSol(false); setVerPistas(false); }}
+          style={{ background:"none", border:`1px solid ${border}`, color:cyan, borderRadius:6, padding:"6px 14px", cursor:"pointer", fontSize:12, marginBottom:20, fontFamily:"'Inter',sans-serif" }}>
+          ← Volver a misiones
+        </button>
+
+        <div style={{ color:cyan, fontSize:10, letterSpacing:4, fontFamily:"monospace", marginBottom:8 }}>
+          CODEQUEST // {m.lenguaje}
+        </div>
+
+        <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:20 }}>
+          <span style={{ fontSize:36 }}>{m.icono}</span>
+          <div>
+            <h2 style={{ color:"#fff", fontSize:20, fontWeight:"bold", margin:"0 0 8px" }}>{m.titulo}</h2>
+            <div style={{ display:"flex", gap:8 }}>
+              <span style={{ background:`${cyan}22`, color:cyan, fontSize:11, padding:"3px 10px", borderRadius:4 }}>{m.dificultad}</span>
+              <span style={{ background:`${green}22`, color:green, fontSize:11, padding:"3px 10px", borderRadius:4 }}>+{m.xp} XP</span>
+              <span style={{ background:`${border}`, color:muted, fontSize:11, padding:"3px 10px", borderRadius:4 }}>{m.lenguaje}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ background:panel, border:`1px solid ${border}`, borderRadius:8, padding:20, marginBottom:14 }}>
+          <div style={{ color:muted, fontSize:10, letterSpacing:2, fontFamily:"monospace", marginBottom:8 }}>DESCRIPCIÓN DE LA MISIÓN</div>
+          <p style={{ color:text, fontSize:14, lineHeight:1.75, margin:0 }}>{m.descripcion}</p>
+        </div>
+
+        <button onClick={() => setVerPistas(!verPistas)}
+          style={{ width:"100%", background:verPistas ? `${cyan}18` : "none", border:`1px solid ${cyan}44`,
+            color:cyan, borderRadius:6, padding:"9px 16px", cursor:"pointer", fontSize:13,
+            marginBottom:10, fontFamily:"'Inter',sans-serif" }}>
+          💡 {verPistas ? "Ocultar pistas" : "Ver pistas"}
+        </button>
+
+        {verPistas && (
+          <div style={{ background:panel, border:`1px solid ${cyan}33`, borderRadius:8, padding:16, marginBottom:10 }}>
+            {m.pistas.map((p, i) => (
+              <div key={i} style={{ color:text, fontSize:13, padding:"8px 0",
+                borderBottom: i < m.pistas.length - 1 ? `1px solid ${border}` : "none" }}>
+                <span style={{ color:cyan, marginRight:8 }}>▸</span>{p}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button onClick={() => setVerSol(!verSol)}
+          style={{ width:"100%", background:verSol ? `${red}18` : "none", border:`1px solid ${red}44`,
+            color:red, borderRadius:6, padding:"9px 16px", cursor:"pointer", fontSize:13,
+            marginBottom:10, fontFamily:"'Inter',sans-serif" }}>
+          👁 {verSol ? "Ocultar solución" : "Ver solución (spoiler)"}
+        </button>
+
+        {verSol && (
+          <div style={{ background:"#010810", border:`1px solid ${border}`, borderRadius:8, padding:20, marginBottom:14 }}>
+            <div style={{ display:"flex", gap:6, marginBottom:12 }}>
+              {["#ff5f57","#ffbd2e","#28c940"].map(col => (
+                <div key={col} style={{ width:11, height:11, borderRadius:"50%", background:col }}/>
+              ))}
+            </div>
+            <pre style={{ color:green, fontFamily:"'Courier New',monospace", fontSize:12,
+              margin:0, whiteSpace:"pre-wrap", lineHeight:1.75 }}>
+              {m.solucion}
+            </pre>
+          </div>
+        )}
+
+        {!comp ? (
+          <button onClick={() => onCompletar(m.id, m.xp)}
+            style={{ width:"100%", background:cyan, color:"#000", border:"none", borderRadius:8,
+              padding:"13px", cursor:"pointer", fontWeight:"bold", fontSize:14,
+              fontFamily:"'Inter',sans-serif" }}>
+            ✓ Marcar como completada (+{m.xp} XP)
+          </button>
+        ) : (
+          <div style={{ background:`${green}15`, border:`1px solid ${green}44`, borderRadius:8,
+            padding:"13px", textAlign:"center", color:green, fontWeight:"bold", fontSize:14 }}>
+            ✅ ¡Misión completada!
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const totalXP = CQ_MISIONES.reduce((a, m) => a + (progresoMisiones[m.id] ? m.xp : 0), 0);
+  const completadas = CQ_MISIONES.filter(m => progresoMisiones[m.id]).length;
+
+  return (
+    <div>
+      <div style={{ color:cyan, fontSize:10, letterSpacing:4, fontFamily:"monospace", marginBottom:8 }}>
+        HACKFORGE // CODEQUEST
+      </div>
+      <h2 style={{ color:"#fff", fontSize:22, fontWeight:"bold", marginBottom:6 }}>CodeQuest</h2>
+      <p style={{ color:muted, fontSize:13, marginBottom:20 }}>
+        Misiones de código con enfoque en ciberseguridad. Resuelve cada reto para ganar XP.
+      </p>
+
+      <div style={{ display:"flex", gap:12, marginBottom:24 }}>
+        <div style={{ background:panel, border:`1px solid ${border}`, borderRadius:8, padding:"12px 20px" }}>
+          <div style={{ color:cyan, fontSize:18, fontWeight:"bold" }}>{completadas}/{CQ_MISIONES.length}</div>
+          <div style={{ color:muted, fontSize:11 }}>Completadas</div>
+        </div>
+        <div style={{ background:panel, border:`1px solid ${border}`, borderRadius:8, padding:"12px 20px" }}>
+          <div style={{ color:green, fontSize:18, fontWeight:"bold" }}>{totalXP} XP</div>
+          <div style={{ color:muted, fontSize:11 }}>Ganados</div>
+        </div>
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:14 }}>
+        {CQ_MISIONES.map(m => {
+          const comp = progresoMisiones[m.id];
+          return (
+            <div key={m.id} onClick={() => setSel(m.id)}
+              style={{ background:panel, border:`1px solid ${comp ? green+"55" : border}`,
+                borderRadius:10, padding:18, cursor:"pointer", transition:"border-color 0.2s",
+                position:"relative" }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+                <span style={{ fontSize:30 }}>{m.icono}</span>
+                {comp && <span style={{ color:green, fontSize:20 }}>✅</span>}
+              </div>
+              <div style={{ color:"#fff", fontWeight:"bold", fontSize:14, marginBottom:6 }}>{m.titulo}</div>
+              <div style={{ color:muted, fontSize:12, marginBottom:12, lineHeight:1.55 }}>
+                {m.descripcion.slice(0, 80)}...
+              </div>
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                <span style={{ background:`${cyan}22`, color:cyan, fontSize:11, padding:"2px 8px", borderRadius:4 }}>{m.dificultad}</span>
+                <span style={{ background:`${green}22`, color:green, fontSize:11, padding:"2px 8px", borderRadius:4 }}>+{m.xp} XP</span>
+                <span style={{ background:border, color:muted, fontSize:11, padding:"2px 8px", borderRadius:4 }}>{m.lenguaje}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── ESTILOS ──────────────────────────────────────────────
 const CSS = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #07090f; font-family: 'Inter', sans-serif; }
@@ -149,199 +331,17 @@ const CSS = `
   }
 `;
 
-
-const CQ_MISIONES = [
-  {
-    id:"cq1", icono:"ðŸ”", titulo:"EscÃ¡ner de Puertos",
-    dificultad:"FÃ¡cil", xp:80, lenguaje:"Python",
-    descripcion:"Escribe un script que escanee los puertos 1-1024 de una IP y liste los que estÃ¡n abiertos.",
-    pistas:["Usa el mÃ³dulo socket","Prueba socket.connect_ex()","Un timeout de 0.5s evita esperas largas"],
-    solucion:`import socket
-def escanear(ip):
-    abiertos = []
-    for p in range(1, 1025):
-        s = socket.socket()
-        s.settimeout(0.5)
-        if s.connect_ex((ip, p)) == 0:
-            abiertos.append(p)
-        s.close()
-    return abiertos
-print(escanear("127.0.0.1"))`,
-  },
-  {
-    id:"cq2", icono:"ðŸ”", titulo:"Cifrado CÃ©sar",
-    dificultad:"FÃ¡cil", xp:60, lenguaje:"Python",
-    descripcion:"Implementa el cifrado CÃ©sar: desplaza cada letra del mensaje N posiciones en el alfabeto.",
-    pistas:["Usa ord() y chr()","Recuerda manejar mayÃºsculas y minÃºsculas","El mÃ³dulo 26 hace el ciclo"],
-    solucion:`def cesar(msg, n):
-    r = ""
-    for c in msg:
-        if c.isalpha():
-            b = ord('A') if c.isupper() else ord('a')
-            r += chr((ord(c) - b + n) % 26 + b)
-        else:
-            r += c
-    return r
-print(cesar("Hola Mundo", 3))`,
-  },
-  {
-    id:"cq3", icono:"ðŸŒ", titulo:"Analizador de Headers HTTP",
-    dificultad:"Medio", xp:100, lenguaje:"Python",
-    descripcion:"Haz un GET a una URL y muestra los headers de seguridad que contiene la respuesta.",
-    pistas:["Usa el mÃ³dulo requests","response.headers es un dict","Busca: content-security-policy, strict-transport-security, x-frame-options"],
-    solucion:`import requests
-def analizar(url):
-    r = requests.get(url, timeout=5)
-    seg = ["content-security-policy","strict-transport-security",
-           "x-frame-options","x-content-type-options","x-xss-protection"]
-    for h in seg:
-        val = r.headers.get(h, "No encontrado")
-        print(f"{h}: {val}")
-analizar("https://example.com")`,
-  },
-  {
-    id:"cq4", icono:"ðŸ’¾", titulo:"Generador de Hashes",
-    dificultad:"FÃ¡cil", xp:70, lenguaje:"Python",
-    descripcion:"Dado un texto, genera su hash en MD5, SHA-1 y SHA-256 e imprÃ­melos.",
-    pistas:["Usa hashlib","Necesitas .encode() antes de hashear","hashlib.md5(), hashlib.sha1(), hashlib.sha256()"],
-    solucion:`import hashlib
-def hashes(txt):
-    b = txt.encode()
-    print("MD5:   ", hashlib.md5(b).hexdigest())
-    print("SHA1:  ", hashlib.sha1(b).hexdigest())
-    print("SHA256:", hashlib.sha256(b).hexdigest())
-hashes("hackforge")`,
-  },
-  {
-    id:"cq5", icono:"ðŸ›¡ï¸", titulo:"Detector de SQL Injection",
-    dificultad:"Medio", xp:120, lenguaje:"Python",
-    descripcion:"Escribe una funciÃ³n que detecte si un string contiene patrones tÃ­picos de SQL Injection.",
-    pistas:["Busca palabras clave: OR, UNION, SELECT, DROP","Las comillas simples son sospechosas","Usa expresiones regulares"],
-    solucion:`import re
-def detectar_sqli(inp):
-    patrones = [r"(\\bOR\\b|\\bUNION\\b|\\bSELECT\\b|\\bDROP\\b)",
-                r"['\"]\\s*(--|#)", r"1\\s*=\\s*1"]
-    for p in patrones:
-        if re.search(p, inp, re.IGNORECASE):
-            return "Posible SQLi detectado"
-    return "Input limpio"
-print(detectar_sqli("' OR 1=1 --"))`,
-  },
-];
-
-
-function CodeQuestView({ progresoMisiones, onCompletar }) {
-  const [sel, setSel] = React.useState(null);
-  const [verSol, setVerSol] = React.useState(false);
-  const [verPistas, setVerPistas] = React.useState(false);
-  const C2 = { bg:"#040c18", panel:"#071628", border:"#0a2540", cyan:"#00d4ff", green:"#00ff88", red:"#ff3366", muted:"#4a7a9b", text:"#cdd9e5" };
-
-  if (sel) {
-    const m = CQ_MISIONES.find(x => x.id === sel);
-    const comp = progresoMisiones && progresoMisiones[m.id];
-    return (
-      <div>
-        <button onClick={() => { setSel(null); setVerSol(false); setVerPistas(false); }}
-          style={{ background:"none", border:"1px solid "+C2.border, color:C2.cyan, borderRadius:6, padding:"6px 14px", cursor:"pointer", fontSize:12, marginBottom:20 }}>
-          â† Volver
-        </button>
-        <div style={{ color:C2.cyan, fontSize:10, letterSpacing:4, fontFamily:"monospace", marginBottom:8 }}>CODEQUEST // {m.lenguaje}</div>
-        <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
-          <span style={{fontSize:32}}>{m.icono}</span>
-          <div>
-            <h2 style={{ color:"#fff", fontSize:18, margin:0 }}>{m.titulo}</h2>
-            <div style={{ display:"flex", gap:8, marginTop:6 }}>
-              <span style={{ background:C2.cyan+"22", color:C2.cyan, fontSize:11, padding:"2px 8px", borderRadius:4 }}>{m.dificultad}</span>
-              <span style={{ background:C2.green+"22", color:C2.green, fontSize:11, padding:"2px 8px", borderRadius:4 }}>+{m.xp} XP</span>
-            </div>
-          </div>
-        </div>
-        <div style={{ background:C2.panel, border:"1px solid "+C2.border, borderRadius:8, padding:20, marginBottom:16 }}>
-          <div style={{ color:C2.muted, fontSize:11, marginBottom:8, fontFamily:"monospace", letterSpacing:2 }}>MISIÃ“N</div>
-          <p style={{ color:C2.text, fontSize:14, lineHeight:1.7, margin:0 }}>{m.descripcion}</p>
-        </div>
-        <button onClick={() => setVerPistas(!verPistas)}
-          style={{ width:"100%", background:verPistas ? C2.cyan+"22":"none", border:"1px solid "+C2.cyan+"44", color:C2.cyan, borderRadius:6, padding:"8px 16px", cursor:"pointer", fontSize:12, marginBottom:10 }}>
-          ðŸ’¡ {verPistas ? "Ocultar pistas" : "Ver pistas"}
-        </button>
-        {verPistas && (
-          <div style={{ background:C2.panel, border:"1px solid "+C2.cyan+"33", borderRadius:8, padding:16, marginBottom:10 }}>
-            {m.pistas.map((p,i) => (
-              <div key={i} style={{ color:C2.text, fontSize:13, padding:"6px 0", borderBottom: i<m.pistas.length-1?"1px solid "+C2.border:"none" }}>
-                <span style={{color:C2.cyan}}>â–¸</span> {p}
-              </div>
-            ))}
-          </div>
-        )}
-        <button onClick={() => setVerSol(!verSol)}
-          style={{ width:"100%", background:verSol ? C2.red+"22":"none", border:"1px solid "+C2.red+"44", color:C2.red, borderRadius:6, padding:"8px 16px", cursor:"pointer", fontSize:12, marginBottom:10 }}>
-          ðŸ‘ {verSol ? "Ocultar soluciÃ³n" : "Ver soluciÃ³n (spoiler)"}
-        </button>
-        {verSol && (
-          <div style={{ background:"#010810", border:"1px solid "+C2.border, borderRadius:8, padding:16, marginBottom:16 }}>
-            <div style={{ display:"flex", gap:6, marginBottom:10 }}>
-              {["#ff5f57","#ffbd2e","#28c940"].map(c => <div key={c} style={{ width:10, height:10, borderRadius:"50%", background:c }}/>)}
-            </div>
-            <pre style={{ color:C2.green, fontFamily:"monospace", fontSize:12, margin:0, whiteSpace:"pre-wrap", lineHeight:1.7 }}>{m.solucion}</pre>
-          </div>
-        )}
-        {!comp ? (
-          <button onClick={() => onCompletar(m.id, m.xp)}
-            style={{ width:"100%", background:C2.cyan, color:"#000", border:"none", borderRadius:8, padding:"12px", cursor:"pointer", fontWeight:700, fontSize:14 }}>
-            âœ“ Marcar completada (+{m.xp} XP)
-          </button>
-        ) : (
-          <div style={{ background:C2.green+"22", border:"1px solid "+C2.green+"44", borderRadius:8, padding:"12px", textAlign:"center", color:C2.green, fontWeight:600 }}>
-            âœ… Â¡MisiÃ³n completada!
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <div style={{ color:C2.cyan, fontSize:10, letterSpacing:4, fontFamily:"monospace", marginBottom:8 }}>HACKFORGE // CODEQUEST</div>
-      <h2 style={{ color:"#fff", fontSize:20, marginBottom:8 }}>CodeQuest</h2>
-      <p style={{ color:C2.muted, fontSize:13, marginBottom:24 }}>Misiones de cÃ³digo con enfoque en ciberseguridad. Completa cada una para ganar XP.</p>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))", gap:14 }}>
-        {CQ_MISIONES.map(m => {
-          const comp = progresoMisiones && progresoMisiones[m.id];
-          return (
-            <div key={m.id} onClick={() => setSel(m.id)}
-              style={{ background:C2.panel, border:"1px solid "+(comp ? C2.green+"44":C2.border), borderRadius:10, padding:18, cursor:"pointer" }}>
-              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
-                <span style={{fontSize:28}}>{m.icono}</span>
-                {comp && <span style={{color:C2.green}}>âœ…</span>}
-              </div>
-              <div style={{ color:"#fff", fontWeight:600, fontSize:14, marginBottom:6 }}>{m.titulo}</div>
-              <div style={{ color:C2.muted, fontSize:12, marginBottom:10, lineHeight:1.5 }}>{m.descripcion.slice(0,75)}...</div>
-              <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-                <span style={{ background:C2.cyan+"22", color:C2.cyan, fontSize:11, padding:"2px 8px", borderRadius:4 }}>{m.dificultad}</span>
-                <span style={{ background:C2.green+"22", color:C2.green, fontSize:11, padding:"2px 8px", borderRadius:4 }}>+{m.xp} XP</span>
-                <span style={{ background:C2.border, color:C2.muted, fontSize:11, padding:"2px 8px", borderRadius:4 }}>{m.lenguaje}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
+// ── APP PRINCIPAL ────────────────────────────────────────
 export default function App() {
   const [session, setSession] = useState(() => {
     try { return JSON.parse(localStorage.getItem("hf_session") || "null"); } catch { return null; }
   });
 
-  const [nav, setNav]             = useState("dash");
-  const [labView, setLabView]     = useState("map");
-  const [activeLab, setActiveLab] = useState(null);
+  const [nav, setNav]               = useState("dash");
+  const [labView, setLabView]       = useState("map");
+  const [activeLab, setActiveLab]   = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [progresoMisiones, setProgresoMisiones] = useState({});
-  const completarMision = (id, pts) => { setProgresoMisiones(prev => ({...prev, [id]: true})); };
 
-  // Clave de progreso por usuario
   const userKey = session ? session.email.replace(/[^a-z0-9]/g, "_") : "guest";
 
   const [doneLabs,  setDoneLabs]  = useLocalStorage(`hf_doneLabs_${userKey}`,  []);
@@ -352,7 +352,9 @@ export default function App() {
   const [flDone,    setFlDone]    = useLocalStorage(`hf_flDone_${userKey}`,    false);
   const [streak,    setStreak]    = useLocalStorage(`hf_streak_${userKey}`,    0);
   const [lastVisit, setLastVisit] = useLocalStorage(`hf_lastVisit_${userKey}`, null);
-  const [progresoMods, setProgresoMods] = useLocalStorage(`hf_progresoMods_${userKey}`, {});
+  const [progresoMods, setProgresoMods]     = useLocalStorage(`hf_progresoMods_${userKey}`, {});
+  const [progresoMisiones, setProgresoMisiones] = useLocalStorage(`hf_progresoMisiones_${userKey}`, {});
+
   const totalXp = 1240 + labsXp;
 
   useEffect(() => {
@@ -383,11 +385,6 @@ export default function App() {
     }
   };
 
-  const completarMision = (id, pts) => {
-    if (!progresoMisiones || progresoMisiones[id]) return;
-    const nm = { ...progresoMisiones, [id]: true };
-    setProgresoMisiones(nm);
-  };
   const completarLeccion = (modId, lecId, xp) => {
     setProgresoMods(p => {
       const mod = p[modId] || { completadas:0, leccionesId:[] };
@@ -397,11 +394,17 @@ export default function App() {
     setLabsXp(prev => prev + xp);
   };
 
+  const completarMision = (id, xp) => {
+    if (progresoMisiones[id]) return;
+    setProgresoMisiones(p => ({ ...p, [id]: true }));
+    setLabsXp(prev => prev + xp);
+  };
+
   const resetProgress = () => {
-    if (window.confirm("Â¿Resetear todo el progreso?")) {
+    if (window.confirm("¿Resetear todo el progreso?")) {
       setDoneLabs([]); setLabsXp(0); setFlStep(0);
       setFlInputs({}); setFlResults({}); setFlDone(false); setStreak(0);
-      setProgresoMods({});
+      setProgresoMods({}); setProgresoMisiones({});
     }
   };
 
@@ -416,7 +419,6 @@ export default function App() {
     setSidebarOpen(false);
   };
 
-  // â”€â”€ PANTALLA DE LOGIN â”€â”€
   if (!session) return <Login onLogin={setSession} />;
 
   return (
@@ -424,18 +426,16 @@ export default function App() {
       <style>{CSS}</style>
 
       <button className="hamburger" onClick={() => setSidebarOpen(o => !o)}>
-        {sidebarOpen ? "âœ•" : "â˜°"}
+        {sidebarOpen ? "✕" : "☰"}
       </button>
 
       <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`} style={{ width:210, background:C.panel, borderRight:`1px solid ${C.border}`, display:"flex", flexDirection:"column", padding:"16px 12px", flexShrink:0, overflowY:"auto" }}>
         <div style={{ marginBottom:20, paddingBottom:16, borderBottom:`1px solid ${C.border}` }}>
-          <div style={{ color:C.cyan, fontSize:10, letterSpacing:4 }}>â—ˆ HACKFORGE</div>
+          <div style={{ color:C.cyan, fontSize:10, letterSpacing:4 }}>◈ HACKFORGE</div>
           <div style={{ color:"#fff", fontSize:15, fontWeight:"bold", marginTop:4 }}>Base Operaciones</div>
-          <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>
-            {session.nombre} Â· Lv.3
-          </div>
+          <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>{session.nombre} · Lv.3</div>
         </div>
 
         <div style={{ marginBottom:18, padding:"10px 12px", background:C.bg, borderRadius:6, border:`1px solid ${C.border}` }}>
@@ -445,35 +445,34 @@ export default function App() {
           <div style={{ height:4, background:C.border, borderRadius:2, overflow:"hidden" }}>
             <div style={{ height:"100%", width:`${Math.min(100,(totalXp/2000)*100)}%`, background:`linear-gradient(to right,${C.cyan},${C.green})`, borderRadius:2, transition:"width 0.5s" }}/>
           </div>
-          <div style={{ color:C.muted, fontSize:10, marginTop:4 }}>ðŸ”¥ Racha: {streak} dÃ­as</div>
+          <div style={{ color:C.muted, fontSize:10, marginTop:4 }}>🔥 Racha: {streak} días</div>
         </div>
 
         {[
-          { id:"dash", icon:"ðŸ ", label:"Dashboard"  },
-          { id:"labs", icon:"âš—ï¸",  label:"Labs"       },
-          { id:"mods", icon:"ðŸ“š", label:"MÃ³dulos"    },
-          { id:"rt",   icon:"ðŸ”´", label:"Red Team"   },
-          { id:"cq",   icon:"ðŸŽ®", label:"CodeQuest"  },
-          { id:"ccna", icon:"ðŸ“¡", label:"CCNA Prep"  },
-        ].map(n=>(
-          <div key={n.id} className="nav-item"
-            onClick={() => handleNav(n.id)}
+          { id:"dash", icon:"🏠", label:"Dashboard" },
+          { id:"labs", icon:"⚗️",  label:"Labs"      },
+          { id:"mods", icon:"📚", label:"Módulos"   },
+          { id:"rt",   icon:"🔴", label:"Red Team"  },
+          { id:"cq",   icon:"🎮", label:"CodeQuest" },
+          { id:"ccna", icon:"📡", label:"CCNA Prep" },
+        ].map(n => (
+          <div key={n.id} className="nav-item" onClick={() => handleNav(n.id)}
             style={{ color:nav===n.id?"#fff":C.muted, background:nav===n.id?`${C.cyan}18`:"transparent", borderColor:nav===n.id?`${C.cyan}44`:"transparent" }}>
             <span style={{ fontSize:16 }}>{n.icon}</span>
             <span>{n.label}</span>
-            {n.id==="labs"&&doneLabs.length>0&&<span style={{ marginLeft:"auto", color:C.green, fontSize:10 }}>{doneLabs.length}âœ“</span>}
+            {n.id==="labs" && doneLabs.length>0 && <span style={{ marginLeft:"auto", color:C.green, fontSize:10 }}>{doneLabs.length}✓</span>}
           </div>
         ))}
 
         <div style={{ marginTop:"auto" }}>
           <button onClick={resetProgress} style={{ width:"100%", background:"transparent", border:`1px solid ${C.border}`, color:C.muted, padding:"6px", borderRadius:4, fontSize:10, cursor:"pointer", marginBottom:8 }}>
-            ðŸ”„ Resetear progreso
+            🔄 Resetear progreso
           </button>
           <button onClick={handleLogout} style={{ width:"100%", background:"transparent", border:`1px solid #ff3b3b44`, color:"#ff6b6b", padding:"6px", borderRadius:4, fontSize:10, cursor:"pointer", marginBottom:10 }}>
-            ðŸšª Cerrar sesiÃ³n
+            🚪 Cerrar sesión
           </button>
           <div style={{ padding:"10px 12px", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:6, fontSize:11 }}>
-            <div style={{ color:C.cyan, fontWeight:"bold" }}>âš¡ PLAN PRO</div>
+            <div style={{ color:C.cyan, fontWeight:"bold" }}>⚡ PLAN PRO</div>
             <div style={{ color:C.muted, fontSize:10, marginTop:2 }}>Acceso completo</div>
           </div>
         </div>
@@ -489,12 +488,12 @@ export default function App() {
 
         {nav==="labs" && labView==="final" && (
           <div style={{ maxWidth:720, margin:"0 auto" }}>
-            <button className="btn" onClick={backToMap} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>â† Volver al mapa</button>
+            <button className="btn" onClick={backToMap} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← Volver al mapa</button>
             <div style={{ textAlign:"center", marginBottom:28 }}>
-              <div style={{ fontSize:44, marginBottom:10 }}>ðŸ¦</div>
-              <div style={{ color:C.yellow, fontSize:11, letterSpacing:4 }}>OPERACIÃ“N FINAL</div>
-              <h2 style={{ color:"#fff", fontSize:20, margin:"8px 0" }}>OPERACIÃ“N: NEXUS BANK</h2>
-              <p style={{ color:C.muted, fontSize:12 }}>Compromete NexusBank usando las 4 tÃ©cnicas en secuencia.</p>
+              <div style={{ fontSize:44, marginBottom:10 }}>🏦</div>
+              <div style={{ color:C.yellow, fontSize:11, letterSpacing:4 }}>OPERACIÓN FINAL</div>
+              <h2 style={{ color:"#fff", fontSize:20, margin:"8px 0" }}>OPERACIÓN: NEXUS BANK</h2>
+              <p style={{ color:C.muted, fontSize:12 }}>Compromete NexusBank usando las 4 técnicas en secuencia.</p>
             </div>
             {FINAL.objectives.map((obj,i)=>{
               const unlocked=i<=flStep; const ok=flResults[i]==="ok";
@@ -503,11 +502,11 @@ export default function App() {
                   <div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:ok?0:14 }}>
                     <span style={{ fontSize:22 }}>{obj.icon}</span>
                     <div style={{ flex:1 }}>
-                      <div style={{ color:ok?C.green:C.yellow, fontSize:10, letterSpacing:2 }}>OBJETIVO {i+1} â€” {obj.tech}</div>
+                      <div style={{ color:ok?C.green:C.yellow, fontSize:10, letterSpacing:2 }}>OBJETIVO {i+1} — {obj.tech}</div>
                       <div style={{ color:"#fff", fontWeight:"bold", fontSize:15 }}>{obj.title}</div>
                       <div style={{ color:C.muted, fontSize:12 }}>{obj.desc}</div>
                     </div>
-                    {ok&&<span style={{ color:C.green, fontSize:20 }}>âœ“</span>}
+                    {ok&&<span style={{ color:C.green, fontSize:20 }}>✓</span>}
                   </div>
                   {unlocked&&!ok&&(
                     <div style={{ display:"flex", gap:8 }}>
@@ -516,21 +515,21 @@ export default function App() {
                       <button className="btn" onClick={()=>submitFinal(i)} style={{ background:C.yellow, color:"#000", padding:"10px 16px", fontSize:12 }}>Ejecutar</button>
                     </div>
                   )}
-                  {flResults[i]==="fail"&&<div style={{ color:C.red, fontSize:11, marginTop:8 }}>âŒ Incorrecto. Revisa el lab correspondiente.</div>}
+                  {flResults[i]==="fail"&&<div style={{ color:C.red, fontSize:11, marginTop:8 }}>❌ Incorrecto. Revisa el lab correspondiente.</div>}
                 </div>
               );
             })}
             {flDone&&(
               <div style={{ background:"#051a0a", border:`2px solid ${C.green}`, borderRadius:10, padding:28, textAlign:"center", marginTop:20 }}>
-                <div style={{ fontSize:40, marginBottom:10 }}>ðŸ†</div>
-                <div style={{ color:C.green, fontSize:14, letterSpacing:3, marginBottom:8 }}>Â¡OPERACIÃ“N COMPLETADA!</div>
-                <div style={{ color:"#fff", fontSize:18, fontWeight:"bold", marginBottom:14 }}>Nivel BÃ¡sico Superado</div>
+                <div style={{ fontSize:40, marginBottom:10 }}>🏆</div>
+                <div style={{ color:C.green, fontSize:14, letterSpacing:3, marginBottom:8 }}>¡OPERACIÓN COMPLETADA!</div>
+                <div style={{ color:"#fff", fontSize:18, fontWeight:"bold", marginBottom:14 }}>Nivel Básico Superado</div>
                 <div style={{ background:"#050810", border:`1px solid ${C.green}44`, padding:10, borderRadius:5, marginBottom:14 }}>
-                  <div style={{ color:C.muted, fontSize:10, marginBottom:3 }}>ðŸš© FLAG FINAL</div>
+                  <div style={{ color:C.muted, fontSize:10, marginBottom:3 }}>🚩 FLAG FINAL</div>
                   <div style={{ color:C.green, fontSize:12, wordBreak:"break-all" }}>{FINAL.flag}</div>
                 </div>
-                <div style={{ color:C.yellow, fontSize:13 }}>+{FINAL.xp} XP Â· {FINAL.badge}</div>
-                <button className="btn" onClick={backToMap} style={{ background:C.green, color:"#000", padding:"11px 22px", fontSize:13, marginTop:14 }}>â† Volver al mapa</button>
+                <div style={{ color:C.yellow, fontSize:13 }}>+{FINAL.xp} XP · {FINAL.badge}</div>
+                <button className="btn" onClick={backToMap} style={{ background:C.green, color:"#000", padding:"11px 22px", fontSize:13, marginTop:14 }}>← Volver al mapa</button>
               </div>
             )}
           </div>
@@ -540,16 +539,21 @@ export default function App() {
 
         {nav==="rt" && <RedTeam progresoRT={progresoMods} onCompletarRT={completarLeccion}/>}
 
-        {nav==="cq"&&(<CodeQuestView progresoMisiones={progresoMisiones} onCompletar={completarMision} />)}
+        {nav==="cq" && (
+          <CodeQuest progresoMisiones={progresoMisiones} onCompletar={completarMision}/>
+        )}
 
-        {nav==="ccna" && <CCNAPrep />}
+        {nav==="ccna" && (
+          <div style={{ textAlign:"center", paddingTop:60 }}>
+            <div style={{ fontSize:48, marginBottom:16 }}>📡</div>
+            <div style={{ color:C.cyan, fontSize:11, letterSpacing:4, marginBottom:8 }}>HACKFORGE // CCNA PREP</div>
+            <h2 style={{ color:"#fff", fontSize:20, marginBottom:12 }}>CCNA Prep Zone</h2>
+            <p style={{ color:C.muted, fontSize:13, maxWidth:400, margin:"0 auto 24px" }}>Próximamente: Preguntas CCNA 200-301, simulador Packet Tracer y flashcards.</p>
+            <div style={{ display:"inline-block", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:8, padding:"12px 24px", color:C.cyan, fontSize:12 }}>🚧 Próximamente</div>
+          </div>
+        )}
 
       </main>
     </div>
   );
 }
-
-
-
-
-
