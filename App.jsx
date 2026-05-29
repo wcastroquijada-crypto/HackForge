@@ -6,6 +6,7 @@ import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
 import RedTeam from "./components/RedTeam/RedTeam";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
+import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
 function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
     try {
@@ -363,11 +364,17 @@ export default function App() {
           </div>
         )}
 
-        {nav==="ccna" && <CCNAPrep />}
+        {nav==="ccna"&&(
+          <div style={{ textAlign:"center", paddingTop:60 }}>
+            <div style={{ fontSize:48, marginBottom:16 }}>📡</div>
+            <div style={{ color:C.cyan, fontSize:11, letterSpacing:4, marginBottom:8 }}>HACKFORGE // CCNA PREP</div>
+            <h2 style={{ color:"#fff", fontSize:20, marginBottom:12 }}>CCNA Prep Zone</h2>
+            <p style={{ color:C.muted, fontSize:13, maxWidth:400, margin:"0 auto 24px" }}>Próximamente: Preguntas CCNA 200-301, simulador Packet Tracer y flashcards.</p>
+            <div style={{ display:"inline-block", background:`${C.cyan}11`, border:`1px solid ${C.cyan}33`, borderRadius:8, padding:"12px 24px", color:C.cyan, fontSize:12 }}>🚧 Próximamente</div>
+          </div>
+        )}
 
       </main>
     </div>
   );
 }
-
-
