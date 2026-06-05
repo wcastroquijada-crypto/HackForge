@@ -65,14 +65,12 @@ function shuffle(arr) {
 // ── BANCO DE PREGUNTAS ──────────────────────────────────
 function BancoPregunta({ onBack }) {
   const [temaSeleccionado, setTemaSeleccionado] = useState(null);
+  const [preguntas, setPreguntas] = useState([]); // ✅ FIX: preguntas en estado para no reshufflear en cada render
   const [pregIdx, setPregIdx] = useState(0);
   const [respuesta, setRespuesta] = useState(null);
   const [enviado, setEnviado] = useState(false);
   const [correctas, setCorrectas] = useState(0);
 
-  const preguntas = temaSeleccionado
-    ? shuffle(PREGUNTAS_CCNA.filter(p => p.tema === temaSeleccionado))
-    : [];
   const preg = preguntas[pregIdx];
 
   const responder = (idx) => {
@@ -89,6 +87,7 @@ function BancoPregunta({ onBack }) {
       setEnviado(false);
     } else {
       setTemaSeleccionado(null);
+      setPreguntas([]);
       setPregIdx(0);
       setRespuesta(null);
       setEnviado(false);
@@ -106,7 +105,16 @@ function BancoPregunta({ onBack }) {
           const count = PREGUNTAS_CCNA.filter(p => p.tema === tema).length;
           return (
             <div key={tema} className="fade-in ccna-btn"
-              onClick={() => { setTemaSeleccionado(tema); setPregIdx(0); setCorrectas(0); }}
+              onClick={() => {
+                // ✅ FIX: shuffle solo una vez al seleccionar tema, guardado en estado
+                const filtered = shuffle(PREGUNTAS_CCNA.filter(p => p.tema === tema));
+                setPreguntas(filtered);
+                setTemaSeleccionado(tema);
+                setPregIdx(0);
+                setCorrectas(0);
+                setRespuesta(null);
+                setEnviado(false);
+              }}
               style={{ background:C.panel, border:`1px solid ${COLOR}33`, borderRadius:8, padding:16, cursor:"pointer", textAlign:"left" }}
               onMouseEnter={e => e.currentTarget.style.borderColor = COLOR+"66"}
               onMouseLeave={e => e.currentTarget.style.borderColor = COLOR+"33"}>
@@ -476,6 +484,3 @@ export default function CCNAPrep() {
     </div>
   );
 }
-
-
-
