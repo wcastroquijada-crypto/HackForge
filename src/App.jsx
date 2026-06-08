@@ -205,7 +205,6 @@ export default function App() {
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:C.bg, color:"#c9d1d9" }}>
-      <style>{CSS}</style>
 
       <button className="hamburger" onClick={() => setSidebarOpen(o => !o)}>
         {sidebarOpen ? "X" : "="}
