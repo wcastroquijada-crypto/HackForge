@@ -1822,28 +1822,28 @@ echo "[*] HACKFORGE CTF RECON - $IP"
 echo "================================"
 
 # Crear estructura
-mkdir -p ctf_${IP}/{recon,loot,exploits}
+mkdir -p ctf_IP/{recon,loot,exploits}
 echo "[+] Workspace creado: ctf_$IP/"
 
 # Nmap
 echo "[*] Ejecutando nmap..."
-nmap -sC -sV $IP -oN ctf_${IP}/recon/nmap_initial.txt 2>/dev/null
+nmap -sC -sV $IP -oN ctf_IP/recon/nmap_initial.txt 2>/dev/null
 
 # Mostrar puertos
 echo ""
 echo "[+] Puertos abiertos:"
-grep '/tcp' ctf_${IP}/recon/nmap_initial.txt | grep 'open'
+grep '/tcp' ctf_IP/recon/nmap_initial.txt | grep 'open'
 
 # Verificar puerto 80
-if grep -q '80/tcp.*open' ctf_${IP}/recon/nmap_initial.txt; then
+if grep -q '80/tcp.*open' ctf_IP/recon/nmap_initial.txt; then
     echo ""
     echo "[*] Puerto 80 detectado. Descargando robots.txt..."
-    curl -s http://$IP/robots.txt > ctf_${IP}/recon/robots.txt 2>/dev/null
+    curl -s http://$IP/robots.txt > ctf_IP/recon/robots.txt 2>/dev/null
     echo "[+] robots.txt guardado"
 fi
 
 # Checklist
-cat > ctf_${IP}/recon/checklist.txt << EOF
+cat > ctf_IP/recon/checklist.txt << EOF
 CTF Checklist para $IP
 ======================
 [ ] Revisar robots.txt
@@ -1860,7 +1860,7 @@ EOF
 echo ""
 echo "[+] Checklist creado"
 echo "[+] Resumen de archivos:"
-ls -la ctf_${IP}/recon/
+ls -la ctf_IP/recon/
 echo "[+] Completado."`,
         test: (codigo) => {
           return codigo.includes("#!/bin/bash") &&
