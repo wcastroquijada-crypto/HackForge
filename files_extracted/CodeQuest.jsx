@@ -6,7 +6,7 @@ import { TERMINAL_PATH } from "../../data/codequest_terminal";
 const LENGUAJES = [
   { id: "python", nombre: "Python", icon: "🐍", color: "#f7c948", disponible: true, descripcion: "El lenguaje más popular para aprender a programar." },
   { id: "javascript", nombre: "JavaScript", icon: "⚡", color: "#f0db4f", disponible: false, descripcion: "El lenguaje de la web. Próximamente." },
-  { id: "bash", nombre: "Bash", icon: "💻", color: "#4ade80", disponible: true, descripcion: "Automatización y scripting en Linux. Próximamente." },
+  { id: "bash", nombre: "Bash", icon: "💻", color: "#4ade80", disponible: true, descripcion: "Terminal Linux para hacking y CTFs. Próximamente." },
   { id: "go", nombre: "Go", icon: "🐹", color: "#00add8", disponible: false, descripcion: "El lenguaje de Google. Próximamente." },
   { id: "rust", nombre: "Rust", icon: "🦀", color: "#f75208", disponible: false, descripcion: "El lenguaje más seguro. Próximamente." },
   { id: "powershell", nombre: "PowerShell", icon: "🔷", color: "#5391fe", disponible: false, descripcion: "Automatización en Windows. Próximamente." },
@@ -159,7 +159,7 @@ const PATH = lenguaje === "bash" ? TERMINAL_PATH : PYTHON_PATH;
         {LENGUAJES.map((lang, i) => (
           <div key={lang.id}
             className="fade-in"
-            onClick={() => lang.disponible && setVista("path")}
+            onClick={() => lang.disponible && (setLenguaje(lang.id), setVista("path"))}
             style={{
               background: lang.disponible ? C.panel : "#090c13",
               border:`1px solid ${lang.disponible ? lang.color+"33" : C.border}`,
