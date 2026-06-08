@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { C } from "../../data/labs";
 import { PYTHON_PATH } from "../../data/codequest_python";
+import { TERMINAL_PATH } from "../../data/codequest_terminal";
 
 const LENGUAJES = [
   { id: "python", nombre: "Python", icon: "🐍", color: "#f7c948", disponible: true, descripcion: "El lenguaje más popular para aprender a programar." },
   { id: "javascript", nombre: "JavaScript", icon: "⚡", color: "#f0db4f", disponible: false, descripcion: "El lenguaje de la web. Próximamente." },
-  { id: "bash", nombre: "Bash", icon: "💻", color: "#4ade80", disponible: false, descripcion: "Automatización y scripting en Linux. Próximamente." },
+  { id: "bash", nombre: "Bash", icon: "💻", color: "#4ade80", disponible: true, descripcion: "Automatización y scripting en Linux. Próximamente." },
   { id: "go", nombre: "Go", icon: "🐹", color: "#00add8", disponible: false, descripcion: "El lenguaje de Google. Próximamente." },
   { id: "rust", nombre: "Rust", icon: "🦀", color: "#f75208", disponible: false, descripcion: "El lenguaje más seguro. Próximamente." },
   { id: "powershell", nombre: "PowerShell", icon: "🔷", color: "#5391fe", disponible: false, descripcion: "Automatización en Windows. Próximamente." },
@@ -42,7 +43,7 @@ export default function CodeQuest({ progresoCQ, onCompletarCQ }) {
   const [desafioOk, setDesafioOk]   = useState(false);
   const editorRef = useRef(null);
 
-  const PATH = PYTHON_PATH;
+const PATH = lenguaje === "bash" ? TERMINAL_PATH : PYTHON_PATH;
   const nivel = mundoActivo?.niveles[nivelIdx];
   const totalNiveles = mundoActivo?.niveles.length || 0;
 
