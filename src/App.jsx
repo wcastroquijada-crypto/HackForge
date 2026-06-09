@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Dashboard from "./components/Dashboard/Dashboard";
 import LabMap from "./components/Labs/LabMap";
+import Labs from "./components/Labs/Labs";
 import LabDetail from "./components/Labs/LabDetail";
 import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
@@ -298,59 +299,7 @@ export default function App() {
 
         {nav==="dash" && <Dashboard totalXp={totalXp} doneLabs={doneLabs} labsXp={labsXp} streak={streak} onNav={setNav}/>}
 
-        {nav==="labs" && labView==="map" && <LabMap doneLabs={doneLabs} labsXp={labsXp} onOpenLab={openLab} onOpenFinal={()=>setLabView("final")} flDone={flDone}/>}
-
-        {nav==="labs" && labView==="detail" && activeLab && <LabDetail lab={activeLab} onBack={backToMap} onComplete={completeLab}/>}
-
-        {nav==="labs" && labView==="final" && (
-          <div style={{ maxWidth:720, margin:"0 auto" }}>
-            <button className="btn" onClick={backToMap} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12, marginBottom:20 }}>← Volver al mapa</button>
-            <div style={{ textAlign:"center", marginBottom:28 }}>
-              <div style={{ fontSize:44, marginBottom:10 }}>🏦</div>
-              <div style={{ color:C.yellow, fontSize:11, letterSpacing:4 }}>OPERACIÓN FINAL</div>
-              <h2 style={{ color:"#fff", fontSize:20, margin:"8px 0" }}>OPERACIÓN: NEXUS BANK</h2>
-              <p style={{ color:C.muted, fontSize:12 }}>Compromete NexusBank usando las 4 técnicas en secuencia.</p>
-            </div>
-            {FINAL.objectives.map((obj,i) => {
-              const unlocked = i <= flStep; const ok = flResults[i] === "ok";
-              return (
-                <div key={i} style={{ marginBottom:12, background:C.panel, border:`1px solid ${ok?C.green:unlocked?C.yellow:C.border}`, borderRadius:8, padding:20, opacity:unlocked?1:0.35 }}>
-                  <div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:ok?0:14 }}>
-                    <span style={{ fontSize:22 }}>{obj.icon}</span>
-                    <div style={{ flex:1 }}>
-                      <div style={{ color:ok?C.green:C.yellow, fontSize:10, letterSpacing:2 }}>OBJETIVO {i+1} — {obj.tech}</div>
-                      <div style={{ color:"#fff", fontWeight:"bold", fontSize:15 }}>{obj.title}</div>
-                      <div style={{ color:C.muted, fontSize:12 }}>{obj.desc}</div>
-                    </div>
-                    {ok && <span style={{ color:C.green, fontSize:20 }}>✓</span>}
-                  </div>
-                  {unlocked && !ok && (
-                    <div style={{ display:"flex", gap:8 }}>
-                      <input value={flInputs[i]||""} onChange={e=>setFlInputs(p=>({...p,[i]:e.target.value}))} placeholder={obj.ph}
-                        onKeyDown={e=>e.key==="Enter"&&submitFinal(i)}
-                        style={{ flex:1, background:"#050810", border:`1px solid ${C.border}`, color:C.cyan, padding:"10px 12px", borderRadius:5, fontFamily:"'Courier New',monospace", fontSize:12, outline:"none" }}/>
-                      <button className="btn" onClick={()=>submitFinal(i)} style={{ background:C.yellow, color:"#000", padding:"10px 16px", fontSize:12 }}>Ejecutar</button>
-                    </div>
-                  )}
-                  {flResults[i]==="fail" && <div style={{ color:C.red, fontSize:11, marginTop:8 }}>❌ Incorrecto. Revisa el lab correspondiente.</div>}
-                </div>
-              );
-            })}
-            {flDone && (
-              <div style={{ background:"#051a0a", border:`2px solid ${C.green}`, borderRadius:10, padding:28, textAlign:"center", marginTop:20 }}>
-                <div style={{ fontSize:40, marginBottom:10 }}>🏆</div>
-                <div style={{ color:C.green, fontSize:14, letterSpacing:3, marginBottom:8 }}>¡OPERACIÓN COMPLETADA!</div>
-                <div style={{ color:"#fff", fontSize:18, fontWeight:"bold", marginBottom:14 }}>Nivel Básico Superado</div>
-                <div style={{ background:"#050810", border:`1px solid ${C.green}44`, padding:10, borderRadius:5, marginBottom:14 }}>
-                  <div style={{ color:C.muted, fontSize:10, marginBottom:3 }}>🚩 FLAG FINAL</div>
-                  <div style={{ color:C.green, fontSize:12, wordBreak:"break-all" }}>{FINAL.flag}</div>
-                </div>
-                <div style={{ color:C.yellow, fontSize:13 }}>+{FINAL.xp} XP · {FINAL.badge}</div>
-                <button className="btn" onClick={backToMap} style={{ background:C.green, color:"#000", padding:"11px 22px", fontSize:13, marginTop:14 }}>← Volver al mapa</button>
-              </div>
-            )}
-          </div>
-        )}
+        {nav==="labs" && <Labs doneLabs={doneLabs} onComplete={completeLab}/>}
 
         {nav==="mods" && <Modulos progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>}
 
@@ -379,3 +328,5 @@ export default function App() {
     </div>
   );
 }
+
+
