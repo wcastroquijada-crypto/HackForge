@@ -6,7 +6,7 @@ import LabDetail from "./components/Labs/LabDetail";
 import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
 import Herramientas from "./components/Herramientas";
-import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
+import CCNAPrep from "./components/CCNAPrep/CCNAPrep_Final";
 import Terminal from "./components/Terminal/Terminal";
 import THMSalas from "./components/Terminal/THMSalas";
 import { THM_SALAS } from "./data/thm_salas";
@@ -328,5 +328,7 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
