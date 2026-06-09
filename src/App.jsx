@@ -4,7 +4,7 @@ import LabMap from "./components/Labs/LabMap";
 import LabDetail from "./components/Labs/LabDetail";
 import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
-import RedTeam from "./components/RedTeam/RedTeam";
+import Herramientas from "./components/Herramientas";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
 import Terminal from "./components/Terminal/Terminal";
 import THMSalas from "./components/Terminal/THMSalas";
@@ -266,7 +266,7 @@ export default function App() {
           { id:"dash",     icon:"🏠", label:"Dashboard"  },
           { id:"labs",     icon:"⚗️",  label:"Labs"       },
           { id:"mods",     icon:"📚", label:"Módulos"    },
-          { id:"rt",       icon:"🔴", label:"Red Team"   },
+         { id:"rt", icon:"🛠️", label:"Herramientas" },
           { id:"terminal", icon:"💻", label:"Terminal"   },
           { id:"ccna",     icon:"📡", label:"CCNA Prep"  },
         ].map(n => (
@@ -354,7 +354,7 @@ export default function App() {
 
         {nav==="mods" && <Modulos progresoMods={progresoMods} onCompletarLeccion={completarLeccion}/>}
 
-        {nav==="rt" && <RedTeam progresoRT={progresoMods} onCompletarRT={completarLeccion}/>}
+        {nav==="rt" && <Herramientas />}
 
         {nav==="terminal" && terminalVista === "menu" && (
           <Terminal

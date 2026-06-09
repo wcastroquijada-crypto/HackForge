@@ -4,7 +4,7 @@ import LabMap from "./components/Labs/LabMap";
 import LabDetail from "./components/Labs/LabDetail";
 import { C, FINAL } from "./data/labs";
 import Modulos from "./components/Modulos/Modulos";
-import RedTeam from "./components/RedTeam/RedTeam";
+import Herramientas from "./components/Herramientas";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
 import CCNAPrep from "./components/CCNAPrep/CCNAPrep";
 function useLocalStorage(key, initialValue) {
