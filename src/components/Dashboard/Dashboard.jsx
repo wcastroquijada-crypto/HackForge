@@ -50,7 +50,7 @@ const OP = {
 
 const RANKS = ["RECRUIT","SPECIALIST","CYBER ANALYST","SENIOR ANALYST","RED OPERATOR","ELITE"];
 
-export default function Dashboard({ totalXp, doneLabs, labsXp, streak, onNav }) {
+export default function Dashboard({ totalXp, doneLabs, labsXp, streak, onNav, nombre }) {
   const xp = totalXp || OP.xp + labsXp;
   const xpPercent = Math.min(100, (xp / OP.xpNext) * 100);
   const maxActivity = Math.max(...OP.activity.map(a => a.val));
@@ -64,7 +64,7 @@ export default function Dashboard({ totalXp, doneLabs, labsXp, streak, onNav }) 
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:12 }}>
           <div>
             <h1 style={{ color:"#fff", fontSize:24, margin:"0 0 4px" }}>
-              Bienvenido, <span style={{ color:C.cyan }}>{OP.name}</span>
+              Bienvenido, <span style={{ color:C.cyan }}>{nombre || OP.name}</span>
             </h1>
             <div style={{ color:C.muted, fontSize:13 }}>
               {OP.rank} · Nivel {OP.rankLevel} · Miembro desde {OP.joinDate}
@@ -251,4 +251,7 @@ export default function Dashboard({ totalXp, doneLabs, labsXp, streak, onNav }) 
     </div>
   );
 }
+
+
+
 

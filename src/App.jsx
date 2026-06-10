@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Landing from "./components/Landing";
 import Dashboard from "./components/Dashboard/Dashboard";
 import LabMap from "./components/Labs/LabMap";
 import Labs from "./components/Labs/Labs";
@@ -143,6 +144,7 @@ const CSS = `
 `;
 
 export default function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [session, setSession] = useState(() => {
     try { return JSON.parse(localStorage.getItem("hf_session") || "null"); } catch { return null; }
   });
@@ -232,7 +234,7 @@ export default function App() {
     setSidebarOpen(false);
   };
 
-  if (!session) return <Login onLogin={setSession} />;
+  if (!session) return showLanding ? <Landing onEntrar={() => setShowLanding(false)} /> : <Login onLogin={setSession} />;
 
   return (
     <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:C.bg, color:"#c9d1d9" }}>
@@ -297,7 +299,7 @@ export default function App() {
 
       <main className="main-content" style={{ flex:1, overflowY:"auto", padding:"24px" }}>
 
-        {nav==="dash" && <Dashboard totalXp={totalXp} doneLabs={doneLabs} labsXp={labsXp} streak={streak} onNav={setNav}/>}
+        {nav==="dash" && <Dashboard totalXp={totalXp} doneLabs={doneLabs} labsXp={labsXp} streak={streak} onNav={setNav} nombre={session.nombre}/>}
 
         {nav==="labs" && <Labs doneLabs={doneLabs} onComplete={completeLab}/>}
 
@@ -328,6 +330,10 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
 
 
 
