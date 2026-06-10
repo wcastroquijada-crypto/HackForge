@@ -106,8 +106,8 @@ export default function Dashboard({ totalXp, doneLabs, labsXp, streak, onNav }) 
         {[
           { label:"XP Total",        val:xp.toLocaleString(),       icon:"⚡", color:C.cyan,   sub:"puntos de experiencia" },
           { label:"Módulos",          val:OP.stats.modulesCompleted, icon:"📚", color:C.green,  sub:"de 5 completados"      },
-          { label:"Labs completados", val:`${doneLabs.length}/4`,    icon:"⚗️",  color:C.purple, sub:"nivel básico"          },
-          { label:"Flags capturadas", val:OP.stats.flagsCaptured,    icon:"🚩", color:C.red,    sub:"en labs"               },
+          { label:"Labs completados", val:`${doneLabs.length}/28`,    icon:"⚗️",  color:C.purple, sub:"nivel básico"          },
+          { label:"Flags capturadas", val:doneLabs.length,    icon:"🚩", color:C.red,    sub:"en labs"               },
           { label:"Racha",            val:`${OP.streak} días`,       icon:"🔥", color:C.orange, sub:"consecutivos"          },
           { label:"Precisión Quiz",   val:`${OP.stats.accuracy}%`,   icon:"🎯", color:C.yellow, sub:"promedio global"       },
           { label:"Lecciones",        val:OP.stats.lessonsCompleted, icon:"📖", color:C.cyan,   sub:"completadas"           },
@@ -251,3 +251,4 @@ export default function Dashboard({ totalXp, doneLabs, labsXp, streak, onNav }) 
     </div>
   );
 }
+
