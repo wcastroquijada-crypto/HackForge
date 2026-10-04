@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { C } from "../../data/labs";
 import { PREGUNTAS_CCNA, FLASHCARDS, EJERCICIOS_SUBNET } from "../../data/ccna_data";
+import BinarioMascaras from "./BinarioMascaras";
 
 // ─── SONIDOS ────────────────────────────────────────────────
 function playSound(type) {
@@ -502,8 +503,22 @@ function FlashcardsView({ onBack }) {
 }
 
 // ─── SUBNETTING ─────────────────────────────────────────────
+ function normalizarEj(e) {
+  if (e.preguntas) return e;
+  const r = e.respuestas;
+  return {
+    enunciado: `Red ${e.red}/${e.prefijo}: calcula los datos de la subred.`,
+    preguntas: [
+      { pregunta: "Máscara de subred", respuesta: r.mascara },
+      { pregunta: "Hosts utilizables", respuesta: String(r.hosts) },
+      { pregunta: "Dirección de broadcast", respuesta: r.broadcast },
+      { pregunta: "Primer host útil", respuesta: r.primera },
+      { pregunta: "Último host útil", respuesta: r.ultima },
+    ],
+  };
+}
 function SubnetSim({ onBack }) {
-  const [ejercicio, setEjercicio] = useState(() => EJERCICIOS_SUBNET[Math.floor(Math.random()*EJERCICIOS_SUBNET.length)]);
+   const [ejercicio, setEjercicio] = useState(() => normalizarEj(EJERCICIOS_SUBNET[Math.floor(Math.random()*EJERCICIOS_SUBNET.length)]));
   const [respuestas, setRespuestas] = useState({});
   const [enviado, setEnviado] = useState(false);
   const [score, setScore] = useState(0);
@@ -519,7 +534,7 @@ function SubnetSim({ onBack }) {
   };
 
   const nuevo = () => {
-    setEjercicio(EJERCICIOS_SUBNET[Math.floor(Math.random()*EJERCICIOS_SUBNET.length)]);
+      setEjercicio(normalizarEj(EJERCICIOS_SUBNET[Math.floor(Math.random()*EJERCICIOS_SUBNET.length)]));
     setRespuestas({}); setEnviado(false); setScore(0);
   };
 
@@ -728,6 +743,7 @@ export default function CCNAPrep() {
     {id:"banco",  icon:"📝", titulo:t.banco,  desc:t.bancoDesc,  color:"#8b5cf6"},
     {id:"flash",  icon:"🃏", titulo:t.flash,  desc:t.flashDesc,  color:"#f59e0b"},
     {id:"subnet", icon:"🧮", titulo:t.subnet, desc:t.subnetDesc, color:"#22c55e"},
+        {id:"binmask", icon:"🔢", titulo:"Binario & Máscaras", desc:"Practica binario y máscaras, y usa la calculadora y el planificador de subredes.", color:"#00ff88"},
     {id:"simulacro",icon:"📊",titulo:t.simulacro,desc:t.simulacroDesc,color:"#ef4444"},
   ];
 
@@ -735,6 +751,7 @@ export default function CCNAPrep() {
   if (vista === "banco")     return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><BancoPregunta onBack={() => setVista("menu")} /></div>;
   if (vista === "flash")     return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><FlashcardsView onBack={() => setVista("menu")} /></div>;
   if (vista === "subnet")    return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><SubnetSim onBack={() => setVista("menu")} /></div>;
+    if (vista === "binmask")   return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><BinarioMascaras onBack={() => setVista("menu")} /></div>;
   if (vista === "simulacro") return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><Simulacro onBack={() => setVista("menu")} /></div>;
 
   return (
