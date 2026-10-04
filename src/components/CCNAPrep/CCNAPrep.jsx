@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { C } from "../../data/labs";
 import { PREGUNTAS_CCNA, FLASHCARDS, EJERCICIOS_SUBNET } from "../../data/ccna_data";
+import BinarioMascaras from "./BinarioMascaras";
 
 
 function playSound(type) {
@@ -450,12 +451,14 @@ export default function CCNAPrep() {
   const SECCIONES = [
     { id:"banco", icon:"📝", titulo:"Banco de Preguntas", desc:"60 preguntas organizadas por tema. Practica a tu ritmo.", color:"#3b82f6" },
     { id:"flash", icon:"🃏", titulo:"Flashcards", desc:"35 tarjetas con comandos, protocolos y conceptos clave.", color:"#8b5cf6" },
+      { id:"binmask", icon:"🔢", titulo:"Binario & Máscaras", desc:"Convierte binario/decimal y calcula máscaras, CIDR, wildcard y hosts.", color:"#00ff88" },
     { id:"subnet", icon:"🧮", titulo:"Simulador de Subnetting", desc:"Practica cálculos de subredes con ejercicios aleatorios.", color:"#f59e0b" },
     { id:"simulacro", icon:"📊", titulo:"Simulacro de Examen", desc:"50 preguntas en 60 minutos. Distintas cada vez. Resultado por tema.", color:"#22c55e" },
   ];
 
   if (vista === "banco") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><BancoPregunta onBack={() => setVista("menu")}/></div>;
   if (vista === "flash") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><FlashcardsView onBack={() => setVista("menu")}/></div>;
+  if (vista === "binmask") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><BinarioMascaras onBack={() => setVista("menu")}/></div>;
   if (vista === "subnet") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><SubnettingView onBack={() => setVista("menu")}/></div>;
   if (vista === "simulacro") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><SimulacroView onBack={() => setVista("menu")}/></div>;
 
