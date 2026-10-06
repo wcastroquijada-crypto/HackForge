@@ -449,6 +449,7 @@ export default function CCNAPrep() {
   const [vista, setVista] = useState("menu");
 
   const SECCIONES = [
+        { id:"puerto", icon:"🎮", titulo:"Puerto Austral: Turno de Red", desc:"Aprende CCNA jugando: historia, 7 capítulos y laboratorios tipo Packet Tracer.", color:"#f08a3c" },
     { id:"banco", icon:"📝", titulo:"Banco de Preguntas", desc:"60 preguntas organizadas por tema. Practica a tu ritmo.", color:"#3b82f6" },
     { id:"flash", icon:"🃏", titulo:"Flashcards", desc:"35 tarjetas con comandos, protocolos y conceptos clave.", color:"#8b5cf6" },
       { id:"binmask", icon:"🔢", titulo:"Binario & Máscaras", desc:"Convierte binario/decimal y calcula máscaras, CIDR, wildcard y hosts.", color:"#00ff88" },
@@ -461,6 +462,17 @@ export default function CCNAPrep() {
   if (vista === "binmask") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><BinarioMascaras onBack={() => setVista("menu")}/></div>;
   if (vista === "subnet") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><SubnettingView onBack={() => setVista("menu")}/></div>;
   if (vista === "simulacro") return <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}><style>{CSS}</style><SimulacroView onBack={() => setVista("menu")}/></div>;
+    if (vista === "puerto") return (
+    <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}>
+      <style>{CSS}</style>
+      <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:12 }}>
+        <button className="ccna-btn" onClick={() => { setVista("menu"); playSound("click"); }} style={{ background:C.dim, color:C.muted, padding:"8px 16px", fontSize:12 }}>← CCNA Prep</button>
+        <a href="/puerto-austral.html" target="_blank" rel="noopener" style={{ color:"#f08a3c", fontSize:12, textDecoration:"none" }}>Abrir en pantalla completa ↗</a>
+      </div>
+      <iframe src="/puerto-austral.html" title="Puerto Austral: Turno de Red" allow="autoplay; clipboard-write"
+        style={{ display:"block", width:"100%", height:"calc(100vh - 140px)", minHeight:600, border:"1px solid #f08a3c33", borderRadius:10, background:"#0a111d" }} />
+    </div>
+  );
 
   return (
     <div style={{ fontFamily:"'Inter',sans-serif", color:"#c9d1d9" }}>
