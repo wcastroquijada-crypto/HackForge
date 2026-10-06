@@ -739,6 +739,7 @@ export default function CCNAPrep() {
   const t = T[lang];
 
   const SECCIONES = [
+        {id:"puerto", icon:"🎮", titulo:"Puerto Austral: Turno de Red", desc: lang==="es" ? "Aprende CCNA jugando: historia, 7 capítulos y laboratorios tipo Packet Tracer." : "Learn CCNA by playing: story, 7 chapters and Packet Tracer-style labs (in Spanish).", color:"#f08a3c"},
     {id:"teoria", icon:"📚", titulo:t.teoria, desc:t.teoriaDesc, color:"#3b82f6"},
     {id:"banco",  icon:"📝", titulo:t.banco,  desc:t.bancoDesc,  color:"#8b5cf6"},
     {id:"flash",  icon:"🃏", titulo:t.flash,  desc:t.flashDesc,  color:"#f59e0b"},
@@ -753,6 +754,17 @@ export default function CCNAPrep() {
   if (vista === "subnet")    return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><SubnetSim onBack={() => setVista("menu")} /></div>;
     if (vista === "binmask")   return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><BinarioMascaras onBack={() => setVista("menu")} /></div>;
   if (vista === "simulacro") return <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}><style>{CSS}</style><Simulacro onBack={() => setVista("menu")} /></div>;
+    if (vista === "puerto") return (
+    <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif",padding:"24px 32px"}}>
+      <style>{CSS}</style>
+      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
+        <button onClick={() => { setVista("menu"); playSound("click"); }} style={{background:"transparent",border:"1px solid #1e2a3a",color:"#8b949e",borderRadius:6,padding:"8px 16px",fontSize:12,cursor:"pointer",fontFamily:"'Inter',sans-serif"}}>{t.volver}</button>
+        <a href="/puerto-austral.html" target="_blank" rel="noopener" style={{color:"#f08a3c",fontSize:12,textDecoration:"none"}}>{lang==="es" ? "Abrir en pantalla completa ↗" : "Open full screen ↗"}</a>
+      </div>
+      <iframe src="/puerto-austral.html" title="Puerto Austral: Turno de Red" allow="autoplay; clipboard-write"
+        style={{display:"block",width:"100%",height:"calc(100vh - 110px)",minHeight:600,border:"1px solid #f08a3c33",borderRadius:12,background:"#0a111d"}} />
+    </div>
+  );
 
   return (
     <div style={{minHeight:"100vh",background:C.bg,color:"#fff",fontFamily:"'Inter',sans-serif"}}>
